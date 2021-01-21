@@ -5,28 +5,26 @@
 #include "CustomSphereComponent.h"
 #include "DrawDebugHelpers.h"
 #include "CustomShapesRenderer.h"
-#include "GenericPlatform/GenericPlatformMath.h"
 
-ACustomShape::ACustomShape() : TableTransform({ 0.0f, 0.0f, 73.0f }, { 0.0f, 0.0f, 0.0f }, { 32.0f, 32.0f, 1.5f }), TableLegsSize(2.0f, 2.0f),
-							   TableMinSize(TableTransform.Size.X, TableTransform.Size.Y)
+ACustomShape::ACustomShape()
 {
 	SceneComponent = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
 	RootComponent = SceneComponent;
 	
-	TableAndChairsMeshComponent = CreateDefaultSubobject<UProceduralMeshComponent>(TEXT("TableAndChairsProceduralMesh"));
-	TableAndChairsMeshComponent->SetupAttachment(RootComponent);
+	TableComponent = CreateDefaultSubobject<UCustomTableComponent>(TEXT("TableComponent"));
+	TableComponent->SetupAttachment(RootComponent);
 
-	TopRightSphere = CreateDefaultSubobject<UCustomSphereComponent>(TEXT("TopRightSphereComponent"));
-	TopRightSphere->SetupAttachment(RootComponent);
+	TopRightSphereComponent = CreateDefaultSubobject<UCustomSphereComponent>(TEXT("TopRightSphereComponent"));
+	TopRightSphereComponent->SetupAttachment(RootComponent);
 
-	BottomRightSphere = CreateDefaultSubobject<UCustomSphereComponent>(TEXT("BottomRightSphereComponent"));
-	BottomRightSphere->SetupAttachment(RootComponent);
+	BottomRightSphereComponent = CreateDefaultSubobject<UCustomSphereComponent>(TEXT("BottomRightSphereComponent"));
+	BottomRightSphereComponent->SetupAttachment(RootComponent);
 
-	TopLeftSphere = CreateDefaultSubobject<UCustomSphereComponent>(TEXT("TopLeftSphereComponent"));
-	TopLeftSphere->SetupAttachment(RootComponent);
+	TopLeftSphereComponent = CreateDefaultSubobject<UCustomSphereComponent>(TEXT("TopLeftSphereComponent"));
+	TopLeftSphereComponent->SetupAttachment(RootComponent);
 
-	BottomLeftSphere = CreateDefaultSubobject<UCustomSphereComponent>(TEXT("BottomLeftSphereComponent"));
-	BottomLeftSphere->SetupAttachment(RootComponent);
+	BottomLeftSphereComponent = CreateDefaultSubobject<UCustomSphereComponent>(TEXT("BottomLeftSphereComponent"));
+	BottomLeftSphereComponent->SetupAttachment(RootComponent);
 
 	static ConstructorHelpers::FObjectFinder<UMaterial> SphereMaterial(TEXT("Material'/Game/StarterContent/Materials/M_Metal_Gold.M_Metal_Gold'"));
 	if (SphereMaterial.Object != NULL)
@@ -40,65 +38,38 @@ ACustomShape::ACustomShape() : TableTransform({ 0.0f, 0.0f, 73.0f }, { 0.0f, 0.0
 		SelectedTableMaterial = (UMaterial*)TableMaterial.Object;
 	}
 	
-	RaycastColliders.Add(TopRightSphere->GetCollider());
-	RaycastColliders.Add(BottomRightSphere->GetCollider());
-	RaycastColliders.Add(TopLeftSphere->GetCollider());
-	RaycastColliders.Add(BottomLeftSphere->GetCollider());
+	RaycastColliders.Add(TopRightSphereComponent->GetCollider());
+	RaycastColliders.Add(BottomRightSphereComponent->GetCollider());
+	RaycastColliders.Add(TopLeftSphereComponent->GetCollider());
+	RaycastColliders.Add(BottomLeftSphereComponent->GetCollider());
 
-	BoundBoxCollider.SetHittableActor(this);
-
-	// Preallocate some custom shape buffer memory.
-	constexpr int32 ReserveSize = 2000;
-	TableAndChairsCustomShapeBuffers.VertexBuffer.Reserve(ReserveSize);
-	TableAndChairsCustomShapeBuffers.IndexBuffer.Reserve(ReserveSize * 6);
-	TableAndChairsCustomShapeBuffers.NormalsBuffer.Reserve(ReserveSize);
-	TableAndChairsCustomShapeBuffers.UV0Buffer.Reserve(ReserveSize);
-	TableAndChairsCustomShapeBuffers.TangentsBuffer.Reserve(ReserveSize);
+	
 }
 
-void ACustomShape::OnHit(const FCustomRaycastBaseCollider* Collider, const FVector& HitPoint)
+void ACustomShape::Generate()
 {
-	UE_LOG(LogTemp, Warning, TEXT("CustomShape on Hit"));
+	FlushPersistentDebugLines(GetWorld());
 
-	TableAndChairsMeshComponent->SetMaterial(0, SelectedTableMaterial);
+	FCustomCubeMeshData Table = TableComponent->Draw();
+	TableComponent->GenerateCollider();
+	ShowDebugBoxCollider();
 
-	FCustomSphereRaycastCollider* SphereCollider = (FCustomSphereRaycastCollider*)Collider;
-	if (SphereCollider == nullptr)
-	{
-		return;
-	}
+	TopRightSphereComponent->Draw(Table.Positions->TopQuad.TopRight, SphereRadius);
+	TopRightSphereComponent->GenerateCollider();
 
-	if (HitSphere != nullptr)
-	{
-		HitSphere->SetMaterial(0, nullptr);
-	}
+	BottomRightSphereComponent->Draw(Table.Positions->TopQuad.BottomRight, SphereRadius);
+	BottomRightSphereComponent->GenerateCollider();
 
-	if (TopRightSphere->GetCollider() == SphereCollider)
-	{
-		HitSphere = TopRightSphere;
-	}
-	else if (BottomRightSphere->GetCollider() == SphereCollider)
-	{
-		HitSphere = BottomRightSphere;
-	}
-	else if (TopLeftSphere->GetCollider() == SphereCollider)
-	{
-		HitSphere = TopLeftSphere;
-	}
-	else if (BottomLeftSphere->GetCollider() == SphereCollider)
-	{
-		HitSphere = BottomLeftSphere;
-	}
+	TopLeftSphereComponent->Draw(Table.Positions->TopQuad.TopLeft, SphereRadius);
+	TopLeftSphereComponent->GenerateCollider();
 
-	if (HitSphere != nullptr)
-	{
-		HitSphere->SetMaterial(0, SelectedSphereMaterial);
-	}
+	BottomLeftSphereComponent->Draw(Table.Positions->TopQuad.BottomLeft, SphereRadius);
+	BottomLeftSphereComponent->GenerateCollider();
 }
 
 bool ACustomShape::Drag(const FCustomRaycastBaseCollider* Collider, const FVector& DragLocation)
 {
-	if (TableAndChairsCustomShapeBuffers.VertexBuffer.Num() == 0)
+	if (TableComponent->GetCustomShapeBuffer().VertexBuffer.Num() == 0)
 	{
 		return false;
 	}
@@ -116,13 +87,13 @@ bool ACustomShape::Drag(const FCustomRaycastBaseCollider* Collider, const FVecto
 
 	FCustomCubeMeshData Table =
 	{
-		(FCustomCubeQuads*)(&TableAndChairsCustomShapeBuffers.VertexBuffer[0]),
-		(FCustomCubeQuads*)(&TableAndChairsCustomShapeBuffers.NormalsBuffer[0])
+		(FCustomCubeQuads*)(&TableComponent->GetCustomShapeBuffer().VertexBuffer[0]),
+		(FCustomCubeQuads*)(&TableComponent->GetCustomShapeBuffer().NormalsBuffer[0])
 	};
 
 	FVector DragDir = (DragLocation - Collider->GetLocation()).GetSafeNormal();
 
-	if (TopRightSphere->GetCollider() == SphereCollider)
+	if (TopRightSphereComponent->GetCollider() == SphereCollider)
 	{
 		if (DragEdge(Table.Normals->BackQuad.TopRight, Table.Normals->RightQuad.TopRight, DragDir, DragThreshold, -DragThreshold))
 		{
@@ -131,16 +102,16 @@ bool ACustomShape::Drag(const FCustomRaycastBaseCollider* Collider, const FVecto
 		}
 	}
 
-	if (BottomRightSphere->GetCollider() == SphereCollider)
+	if (BottomRightSphereComponent->GetCollider() == SphereCollider)
 	{
-		if (DragEdge(Table.Normals->FrontQuad.TopRight, Table.Normals->RightQuad.TopRight , DragDir, -DragThreshold, -DragThreshold))
+		if (DragEdge(Table.Normals->FrontQuad.TopRight, Table.Normals->RightQuad.TopRight, DragDir, -DragThreshold, -DragThreshold))
 		{
 			Generate();
 			return true;
 		}
 	}
 
-	if (TopLeftSphere->GetCollider() == SphereCollider)
+	if (TopLeftSphereComponent->GetCollider() == SphereCollider)
 	{
 		if (DragEdge(Table.Normals->BackQuad.TopRight, Table.Normals->LeftQuad.TopRight, DragDir, DragThreshold, DragThreshold))
 		{
@@ -149,7 +120,7 @@ bool ACustomShape::Drag(const FCustomRaycastBaseCollider* Collider, const FVecto
 		}
 	}
 
-	if (BottomLeftSphere->GetCollider() == SphereCollider)
+	if (BottomLeftSphereComponent->GetCollider() == SphereCollider)
 	{
 		if (DragEdge(Table.Normals->FrontQuad.TopRight, Table.Normals->LeftQuad.TopRight, DragDir, -DragThreshold, DragThreshold))
 		{
@@ -157,7 +128,7 @@ bool ACustomShape::Drag(const FCustomRaycastBaseCollider* Collider, const FVecto
 			return true;
 		}
 	}
-	
+
 	return false;
 }
 
@@ -173,24 +144,24 @@ bool ACustomShape::DragEdge(const FVector& ForwardDir, const FVector& RightDir, 
 
 	if (ForwardDotProdAbs > 0.5f)
 	{
-		float TableSizeX = TableTransform.Size.X + abs(ForwardDragDistance) * (ForwardDotProd / ForwardDotProdAbs);
+		float TableSizeX = TableComponent->GetTransform().Size.X + abs(ForwardDragDistance) * (ForwardDotProd / ForwardDotProdAbs);
 
-		if (TableSizeX >= TableMinSize.X)
+		if (TableSizeX >= TableComponent->GetTableMinSize().X)
 		{
-			TableTransform.Size.X = TableSizeX;
-			TableTransform.Location.X -= ForwardDragDistance * (ForwardDotProd / ForwardDotProdAbs);
+			TableComponent->GetTransform().Size.X = TableSizeX;
+			TableComponent->GetTransform().Location.X -= ForwardDragDistance * (ForwardDotProd / ForwardDotProdAbs);
 			bDragged = true;
 		}
 	}
 
 	if (RightDotProdAbs > 0.5f)
 	{
-		float TableSizeY = TableTransform.Size.Y + abs(RightDragDistance) * (RightDotProd / RightDotProdAbs);
+		float TableSizeY = TableComponent->GetTransform().Size.Y + abs(RightDragDistance) * (RightDotProd / RightDotProdAbs);
 
-		if (TableSizeY >= TableMinSize.Y)
+		if (TableSizeY >= TableComponent->GetTableMinSize().Y)
 		{
-			TableTransform.Size.Y = TableSizeY;
-			TableTransform.Location.Y -= RightDragDistance * (RightDotProd / RightDotProdAbs);
+			TableComponent->GetTransform().Size.Y = TableSizeY;
+			TableComponent->GetTransform().Location.Y -= RightDragDistance * (RightDotProd / RightDotProdAbs);
 			bDragged = true;
 		}
 	}
@@ -198,267 +169,91 @@ bool ACustomShape::DragEdge(const FVector& ForwardDir, const FVector& RightDir, 
 	return bDragged;
 }
 
-void ACustomShape::Generate()
-{
-	TableTransform.Size.X = FGenericPlatformMath::Max(TableTransform.Size.X, TableMinSize.X);
-	TableTransform.Size.Y = FGenericPlatformMath::Max(TableTransform.Size.Y, TableMinSize.Y);
-
-	TableAndChairsCustomShapeBuffers.Reset();
-
-	FCustomCubeMeshData Table;
-	CustomShapesRenderer::BeginScene(TableAndChairsCustomShapeBuffers, *TableAndChairsMeshComponent);
-	{
-		Table = DrawTable(TableTransform, TableLegsSize);
-		DrawChairs(Table);
-	}
-	CustomShapesRenderer::EndScene();
-
-	TopRightSphere->Draw(Table.Positions->TopQuad.TopRight, SphereRadius);
-	TopRightSphere->GenerateCollider();
-
-	BottomRightSphere->Draw(Table.Positions->TopQuad.BottomRight, SphereRadius);
-	BottomRightSphere->GenerateCollider();
-
-	TopLeftSphere->Draw(Table.Positions->TopQuad.TopLeft, SphereRadius);
-	TopLeftSphere->GenerateCollider();
-
-	BottomLeftSphere->Draw(Table.Positions->TopQuad.BottomLeft, SphereRadius);
-	BottomLeftSphere->GenerateCollider();
-
-	const float DistanceFromMidToBackChair = TableTransform.Size.X + ChairDistanceFromTableSide + ChairSize.X + ChairBackRestSize.X;
-	const FVector MinStartLocation = TableTransform.Location + Table.Normals->TopQuad.TopRight * 20.f;
-	const FVector MaxStartLocation = TableTransform.Location - Table.Normals->TopQuad.TopRight * TableTransform.Location.Z; 
-
-	BoundBoxCollider.SetMaxBounds((MinStartLocation + Table.Normals->FrontQuad.TopRight * DistanceFromMidToBackChair)
-		+ Table.Normals->RightQuad.TopRight * DistanceFromMidToBackChair);
-
-	BoundBoxCollider.SetMinBounds((MaxStartLocation + Table.Normals->BackQuad.TopRight * DistanceFromMidToBackChair)
-		+ Table.Normals->LeftQuad.TopRight * DistanceFromMidToBackChair);
-}
-
 void ACustomShape::ResetSelection()
 {
 	UE_LOG(LogTemp, Warning, TEXT("CustomShape ResetSelection"));
 
-	TableAndChairsMeshComponent->SetMaterial(0, nullptr);
+	TableComponent->SetMaterial(0, nullptr);
 	if (HitSphere != nullptr)
 	{
 		HitSphere->SetMaterial(0, nullptr);
 	}
 }
 
-FCustomCubeMeshData ACustomShape::DrawTable(const FCustomCubeTransform& Transform, const FVector2D& LegsSize)
+void ACustomShape::OnHit(const FCustomRaycastBaseCollider* Collider, const FVector& HitPoint)
 {
-	FCustomCubeMeshData TableVerticesData = CustomShapesRenderer::DrawCube(Transform);
-	DrawFrontLeftLeg(Transform, TableVerticesData, LegsSize);
-	DrawFrontRightLeg(Transform, TableVerticesData, LegsSize);
-	DrawBackLeftLeg(Transform, TableVerticesData, LegsSize);
-	DrawBackRightLeg(Transform, TableVerticesData, LegsSize);
+	UE_LOG(LogTemp, Warning, TEXT("CustomShape on Hit"));
 
-	return TableVerticesData;
-}
+	TableComponent->SetMaterial(0, SelectedTableMaterial);
 
-void ACustomShape::DrawChairs(const FCustomCubeMeshData& TableCustomVertices)
-{
-	// FRONT CHAIRS
-	const FCustomQuadVertices& TableFrontQuad = TableCustomVertices.Positions->FrontQuad;
-	const FVector& TableFrontOffset = TableCustomVertices.Normals->FrontQuad.TopRight;
-	DrawSequenceOfChairs(TableFrontQuad.BottomRight, TableFrontQuad.BottomLeft, TableFrontOffset, 180.0f);
-
-	// LEFT CHARIS
-	const FCustomQuadVertices& TableLeftQuad = TableCustomVertices.Positions->LeftQuad;
-	const FVector& TableLeftOffset = TableCustomVertices.Normals->LeftQuad.TopRight;
-	DrawSequenceOfChairs(TableLeftQuad.BottomRight, TableLeftQuad.BottomLeft, TableLeftOffset, 90.0f);
-
-	// BACK CHAIRS
-	const FCustomQuadVertices& TableBackQuad = TableCustomVertices.Positions->BackQuad;
-	const FVector& TableBackOffset = TableCustomVertices.Normals->BackQuad.TopRight;
-	DrawSequenceOfChairs(TableBackQuad.BottomRight, TableBackQuad.BottomLeft, TableBackOffset, 0.0f);
-
-	// RIGHT CHARIS
-	const FCustomQuadVertices& TableRightQuad = TableCustomVertices.Positions->RightQuad;
-	const FVector& TableRightOffset = TableCustomVertices.Normals->RightQuad.TopRight;
-	DrawSequenceOfChairs(TableRightQuad.BottomRight, TableRightQuad.BottomLeft, TableRightOffset, -90.0f);
-}
-
-void ACustomShape::DrawSequenceOfChairs(const FVector& TableRightCorner, const FVector& TableLeftCorner, const FVector& OffsetDirection, float Rotation)
-{
-	//	To draw a sequence of chairs we start from the right leg of the current side of the table plus a distance value.
-	//	We take the end point of the side (aka the left leg of the current side of the table plus a distance value),
-	//	then we calculate the distance between those points.
-	//	Once we have the distance we interpolate it and we place a chair if possible.
-	//	Every loop we increase the traveled distance by the chair size and the distance between each chair.
-	//
-	//	Start and End points offsets is useful to place each chairs away from the table, otherwise they can clip with the table.
-	//	
-	//	s = start chair
-	//	c = center of the chair
-	//	e = end chair
-	//	
-	//	Sequence direction
-	//	------------------>
-	//	 _______________________
-	//	|						|
-	//	|						|
-	//	|---s--c--e---s--c--e---|
-	//	|						|
-	//
-
-	
-	// Direction to place every chairs next to each others.
-	const FVector SequenceDirection = (TableLeftCorner - TableRightCorner).GetSafeNormal(); 
-
-	const FVector OffsetFromTableLegs = SequenceDirection * (TableLegsSize.Y * 2 + DistanceBetweenChairs);
-
-	// We assume that the table x axis rotation is always 0.
-	const FVector OffSetFromTableBottom = FVector::DownVector * ChairDistanceFromTableBottom;
-
-	const FVector OffSetFromTableSide = OffsetDirection * ChairDistanceFromTableSide;
-
-	const FVector StartPosition = TableRightCorner + OffsetFromTableLegs + OffSetFromTableBottom + OffSetFromTableSide;
-	const FVector EndPosition = TableLeftCorner + OffsetFromTableLegs * -1 + OffSetFromTableBottom + OffSetFromTableSide;
-
-	const float DistanceToTravel = FVector::Dist(StartPosition, EndPosition);
-	float DistanceTraveled = ChairSize.Y * 2;
-
-	while (DistanceTraveled <= DistanceToTravel)
+	FCustomSphereRaycastCollider* SphereCollider = (FCustomSphereRaycastCollider*)Collider;
+	if (SphereCollider == nullptr)
 	{
-		//DrawDebugSphere(GetWorld(), StartPosition + SequenceDirection * DistanceTraveled, 1.0f, 20, FColor::Black, true);
-		//UE_LOG(LogTemp, Warning, TEXT("Dist traveled %f"), DistTraveled);
-		//UE_LOG(LogTemp, Warning, TEXT("Dist traveled half %f"), DistTraveled - ChairSize.Y);
-
-		FCustomCubeTransform ChairTransform
-		{
-			ChairTransform.Location = StartPosition + SequenceDirection * (DistanceTraveled - ChairSize.Y),
-			ChairTransform.Rotation = { 0.0f, 0.0f, Rotation + TableTransform.Rotation.Z},
-			ChairTransform.Size = ChairSize
-		};
-
-		//DrawDebugSphere(GetWorld(), ChairTransform.Location, 1.0f, 20, FColor::Purple, true);
-
-		DrawChair(ChairTransform);
-
-		DistanceTraveled += ChairSize.Y * 2 + DistanceBetweenChairs;
+		return;
 	}
 
-	/*DrawDebugLine(GetWorld(), StartPosition, EndPosition, FColor::Red, true);
-	DrawDebugSphere(GetWorld(), StartPosition, 1.0f, 20, FColor::Green, true);
-	DrawDebugSphere(GetWorld(), EndPosition, 1.0f, 20, FColor::Yellow, true);*/
+	if (HitSphere != nullptr)
+	{
+		HitSphere->SetMaterial(0, nullptr);
+	}
+
+	if (TopRightSphereComponent->GetCollider() == SphereCollider)
+	{
+		HitSphere = TopRightSphereComponent;
+	}
+	else if (BottomRightSphereComponent->GetCollider() == SphereCollider)
+	{
+		HitSphere = BottomRightSphereComponent;
+	}
+	else if (TopLeftSphereComponent->GetCollider() == SphereCollider)
+	{
+		HitSphere = TopLeftSphereComponent;
+	}
+	else if (BottomLeftSphereComponent->GetCollider() == SphereCollider)
+	{
+		HitSphere = BottomLeftSphereComponent;
+	}
+
+	if (HitSphere != nullptr)
+	{
+		HitSphere->SetMaterial(0, SelectedSphereMaterial);
+	}
 }
 
-FCustomCubeMeshData ACustomShape::DrawChair(const FCustomCubeTransform& Transform)
+void ACustomShape::ShowDebugBoxCollider() const
 {
-	FCustomCubeMeshData ChairSeat = DrawTable(Transform, ChairLegsSize);
+	if (TableComponent == nullptr || TableComponent->GetCollider() == nullptr)
+	{
+		return;
+	}
 
-	const FVector& ChairForwardDir = ChairSeat.Normals->FrontQuad.TopLeft;
-	const FVector& ChairLeftDir = ChairSeat.Normals->RightQuad.TopLeft;
-	const FVector& ChairUpDir = ChairSeat.Normals->TopQuad.TopLeft;
+	const FVector& BackBottomLeftStart = TableComponent->GetCollider()->GetMinBounds();
+	const FVector& FrontTopRightStart = TableComponent->GetCollider()->GetMaxBounds();
 
-	FCustomCubeTransform ChairBackRestTransform;
-	ChairBackRestTransform.Location = ChairSeat.Positions->TopQuad.TopLeft;
-	ChairBackRestTransform.Location += ChairForwardDir * ChairBackRestSize.X;
-	ChairBackRestTransform.Location += ChairLeftDir * Transform.Size.Y;
-	ChairBackRestTransform.Location += ChairUpDir * ChairBackRestSize.Z;
+	const float XSize = FrontTopRightStart.X - BackBottomLeftStart.X;
+	const float YSize = FrontTopRightStart.Y - BackBottomLeftStart.Y;
+	const float ZSize = FrontTopRightStart.Z - BackBottomLeftStart.Z;
 
-	ChairBackRestTransform.Rotation = Transform.Rotation;
+	const FVector BackTopLeftStart = BackBottomLeftStart + FVector::UpVector * ZSize;
+	const FVector BackBottomRightStart = BackBottomLeftStart + FVector::RightVector * YSize;
 
-	ChairBackRestTransform.Size.X = ChairBackRestSize.X;
-	ChairBackRestTransform.Size.Y = Transform.Size.Y;
-	ChairBackRestTransform.Size.Z = ChairBackRestSize.Z;
+	const FVector FrontBottomRightStart = FrontTopRightStart + FVector::DownVector * ZSize;
+	const FVector FrontBottomLeftStart = FrontBottomRightStart + FVector::LeftVector * YSize;
 
-	CustomShapesRenderer::DrawCube(ChairBackRestTransform);
+	DrawDebugLine(GetWorld(), BackBottomLeftStart, BackBottomLeftStart + FVector::RightVector * YSize, FColor::Red, true, -1.0f, 0, 1.0f);
+	DrawDebugLine(GetWorld(), BackBottomLeftStart, BackBottomLeftStart + FVector::UpVector * ZSize, FColor::Red, true, -1.0f, 0, 1.0f);
+	DrawDebugLine(GetWorld(), BackBottomLeftStart, BackBottomLeftStart + FVector::ForwardVector * XSize, FColor::Red, true, -1.0f, 0, 1.0f);
 
-	return ChairSeat;
-}
+	DrawDebugLine(GetWorld(), FrontTopRightStart, FrontTopRightStart + FVector::LeftVector * YSize, FColor::Red, true, -1.0f, 0, 1.0f);
+	DrawDebugLine(GetWorld(), FrontTopRightStart, FrontTopRightStart + FVector::DownVector * ZSize, FColor::Red, true, -1.0f, 0, 1.0f);
+	DrawDebugLine(GetWorld(), FrontTopRightStart, FrontTopRightStart + FVector::BackwardVector * XSize, FColor::Red, true, -1.0f, 0, 1.0f);
 
-FCustomCubeMeshData ACustomShape::DrawFrontLeftLeg(const FCustomCubeTransform& Transform, const FCustomCubeMeshData& VerticesData, const FVector2D& LegsSize)
-{
-	const float Height = (Transform.Location.Z - Transform.Size.Z) * 0.5f;
+	DrawDebugLine(GetWorld(), FrontBottomRightStart, FrontBottomRightStart + FVector::BackwardVector * XSize, FColor::Red, true, -1.0f, 0, 1.0f);
+	DrawDebugLine(GetWorld(), FrontBottomRightStart, FrontBottomRightStart + FVector::LeftVector * YSize, FColor::Red, true, -1.0f, 0, 1.0f);
 
-	const FVector& ForwardDir = VerticesData.Normals->FrontQuad.TopLeft;
-	const FVector& LeftDir = VerticesData.Normals->RightQuad.TopLeft;
-	const FVector& UpDir = VerticesData.Normals->TopQuad.TopLeft;
+	DrawDebugLine(GetWorld(), BackTopLeftStart, BackTopLeftStart + FVector::ForwardVector * XSize, FColor::Red, true, -1.0f, 0, 1.0f);
+	DrawDebugLine(GetWorld(), BackTopLeftStart, BackTopLeftStart + FVector::RightVector * YSize, FColor::Red, true, -1.0f, 0, 1.0f);
 
-	FCustomCubeTransform LegTransform;
-	LegTransform.Location = VerticesData.Positions->BottomQuad.BottomRight;
-	LegTransform.Location -= ForwardDir * LegsSize.X;
-	LegTransform.Location += LeftDir * LegsSize.Y;
-	LegTransform.Location -= UpDir * Height;
-
-	LegTransform.Rotation = Transform.Rotation;
-
-	LegTransform.Size.X = LegsSize.X;
-	LegTransform.Size.Y = LegsSize.Y;
-	LegTransform.Size.Z = Height;
-
-	return CustomShapesRenderer::DrawCube(LegTransform);
-}
-
-FCustomCubeMeshData ACustomShape::DrawFrontRightLeg(const FCustomCubeTransform& Transform, const FCustomCubeMeshData& VerticesData, const FVector2D& LegsSize)
-{
-	const float Height = (Transform.Location.Z - Transform.Size.Z) * 0.5f;
-
-	const FVector& ForwardDir = VerticesData.Normals->FrontQuad.TopLeft;
-	const FVector& LeftDir = VerticesData.Normals->RightQuad.TopLeft;
-	const FVector& UpDir = VerticesData.Normals->TopQuad.TopLeft;
-
-	FCustomCubeTransform LegTransform;
-	LegTransform.Location = VerticesData.Positions->BottomQuad.BottomLeft;
-	LegTransform.Location -= ForwardDir * LegsSize.X;
-	LegTransform.Location -= LeftDir * LegsSize.Y;
-	LegTransform.Location -= UpDir * Height;
-
-	LegTransform.Rotation = Transform.Rotation;
-
-	LegTransform.Size.X = LegsSize.X;
-	LegTransform.Size.Y = LegsSize.Y;
-	LegTransform.Size.Z = Height;
-
-	return CustomShapesRenderer::DrawCube(LegTransform);
-}
-
-FCustomCubeMeshData ACustomShape::DrawBackLeftLeg(const FCustomCubeTransform& Transform, const FCustomCubeMeshData& VerticesData, const FVector2D& LegsSize)
-{
-	const float Height = (Transform.Location.Z - Transform.Size.Z) * 0.5f;
-
-	const FVector& ForwardDir = VerticesData.Normals->FrontQuad.TopLeft;
-	const FVector& LeftDir = VerticesData.Normals->RightQuad.TopLeft;
-	const FVector& UpDir = VerticesData.Normals->TopQuad.TopLeft;
-
-	FCustomCubeTransform LegTransform;
-	LegTransform.Location = VerticesData.Positions->BottomQuad.TopRight;
-	LegTransform.Location += ForwardDir * LegsSize.X;
-	LegTransform.Location += LeftDir * LegsSize.Y;
-	LegTransform.Location -= UpDir * Height;
-
-	LegTransform.Rotation = Transform.Rotation;
-
-	LegTransform.Size.X = LegsSize.X;
-	LegTransform.Size.Y = LegsSize.Y;
-	LegTransform.Size.Z = Height;
-
-	return CustomShapesRenderer::DrawCube(LegTransform);
-}
-
-FCustomCubeMeshData ACustomShape::DrawBackRightLeg(const FCustomCubeTransform& Transform, const FCustomCubeMeshData& VerticesData, const FVector2D& LegsSize)
-{
-	const float Height = (Transform.Location.Z - Transform.Size.Z) * 0.5f;
-
-	const FVector& ForwardDir = VerticesData.Normals->FrontQuad.TopLeft;
-	const FVector& LeftDir = VerticesData.Normals->RightQuad.TopLeft;
-	const FVector& UpDir = VerticesData.Normals->TopQuad.TopLeft;
-
-	FCustomCubeTransform LegTransform;
-	LegTransform.Location = VerticesData.Positions->BottomQuad.TopLeft;
-	LegTransform.Location += ForwardDir * LegsSize.X;
-	LegTransform.Location -= LeftDir * LegsSize.Y;
-	LegTransform.Location -= UpDir * Height;
-
-	LegTransform.Rotation = Transform.Rotation;
-
-	LegTransform.Size.X = LegsSize.X;
-	LegTransform.Size.Y = LegsSize.Y;
-	LegTransform.Size.Z = Height;
-
-	return CustomShapesRenderer::DrawCube(LegTransform);
+	DrawDebugLine(GetWorld(), BackBottomRightStart, BackBottomRightStart + FVector::UpVector * ZSize, FColor::Red, true, -1.0f, 0, 1.0f);
+	DrawDebugLine(GetWorld(), FrontBottomLeftStart, FrontBottomLeftStart + FVector::UpVector * ZSize, FColor::Red, true, -1.0f, 0, 1.0f);
 }

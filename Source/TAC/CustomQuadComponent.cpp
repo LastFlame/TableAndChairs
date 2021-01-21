@@ -3,6 +3,7 @@
 
 #include "CustomQuadComponent.h"
 #include "CustomShapesRenderer.h"
+#include "DrawDebugHelpers.h"
 
 UCustomQuadComponent::UCustomQuadComponent(const FObjectInitializer& ObjectInitializer) : UProceduralMeshComponent(ObjectInitializer)
 {

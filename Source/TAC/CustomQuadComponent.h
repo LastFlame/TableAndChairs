@@ -34,12 +34,12 @@ public:
 	FCustomBoxRaycastCollider* GetCollider() { return &CustomBoxCollider; }
 
 private:
-	UPROPERTY(EditAnywhere, Category = "Custom")
+	UPROPERTY(EditAnywhere, Category = "Custom transform")
 	FCustomQuadTransform CustomTransform;
 
-	UPROPERTY(EditAnywhere, Category = "Custom")
+	UPROPERTY(EditAnywhere, Category = "Custom colliders")
 	FCustomBoxRaycastCollider CustomBoxCollider;
 
-	UPROPERTY(VisibleAnywhere, Category = "Custom")
+	UPROPERTY()
 	FCustomShapeBuffers CustomShapeBuffers;
 };

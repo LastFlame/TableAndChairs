@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "UObject/Interface.h"
-#include "DrawDebugHelpers.h"
 #include "CustomRaycastTypes.generated.h"
 
 UINTERFACE(MinimalAPI)
@@ -40,7 +39,7 @@ struct TAC_API FCustomRaycastBaseCollider
 	void SetHittableActor(ICustomRaycastHittable* NewHittableActor) { HittableActor = NewHittableActor; }
 
 protected:
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(EditAnywhere)
 	FVector Location;
 
 	ICustomRaycastHittable* HittableActor = nullptr;
@@ -51,40 +50,8 @@ struct FCustomSphereRaycastCollider : public FCustomRaycastBaseCollider
 {
 	GENERATED_USTRUCT_BODY()
 
-	virtual bool HasBeenHit(const FVector& Origin, const FVector& Direction, FVector& OutHitPoint) const override
-	{
-		const float DirectionSize = Direction.Size();
-
-		const FVector FromSphereToOrigin = Origin - Location;
-		const float FromSphereToOriginSize = FromSphereToOrigin.Size();
-
-		const float a = DirectionSize * DirectionSize; // Same as Dot(dir,dir).
-		const float b = 2 * FVector::DotProduct(Direction, FromSphereToOrigin);
-		const float c = FromSphereToOriginSize * FromSphereToOriginSize - Radius * Radius;
-
-		const float Discrim = b * b - 4 * a * c;
-
-		bool bCollisionPointFound = false;
-
-		if (Discrim > 0)
-		{
-			OutHitPoint = Origin + Direction * ((-b - sqrt(Discrim)) / (2 * a));
-			bCollisionPointFound = true;
-		}
-		else if (Discrim == 0)
-		{
-			OutHitPoint = Origin + Direction * -b  / (2 * a);
-			bCollisionPointFound = true;
-		}
-
-		if (bCollisionPointFound && HittableActor != nullptr)
-		{
-			HittableActor->OnHit(this, OutHitPoint);
-		}
-
-		return bCollisionPointFound;
-	}
-
+	virtual bool HasBeenHit(const FVector& Origin, const FVector& Direction, FVector& OutHitPoint) const override;
+	
 	float GetRadius() const { return Radius; }
 	void SetRadius(float NewRadius) { Radius = NewRadius; }
 
@@ -98,80 +65,7 @@ struct FCustomBoxRaycastCollider : public FCustomRaycastBaseCollider
 {
 	GENERATED_USTRUCT_BODY()
 
-	virtual bool HasBeenHit(const FVector& Origin, const FVector& Direction, FVector& OutHitPoint) const override
-	{
-		float tmin = (MinBounds.Y - Origin.Y) / Direction.Y;
-		float tmax = (MaxBounds.Y - Origin.Y) / Direction.Y;
-
-		if (tmin > tmax)
-		{
-			float ttemp = tmax;
-
-			tmax = tmin;
-			tmin = ttemp;
-		}
-
-		float tzmin = (MinBounds.Z - Origin.Z) / Direction.Z;
-		float tzmax = (MaxBounds.Z - Origin.Z) / Direction.Z;
-
-		if (tzmin > tzmax)
-		{
-			float ttemp = tzmax;
-
-			tzmax = tzmin;
-			tzmin = ttemp;
-		}
-
-		if (tmin > tzmax || tzmin > tmax)
-		{
-			return false;
-		}
-
-		if (tzmin > tmin)
-		{
-			tmin = tzmin;
-		}
-
-		if (tzmax < tmax)
-		{
-			tmax = tzmax;
-		}
-
-		float txmin = (MinBounds.X - Origin.X) / Direction.X;
-		float txmax = (MaxBounds.X - Origin.X) / Direction.X;
-
-		if (txmin > txmax)
-		{
-			float ttemp = txmax;
-
-			txmax = txmin;
-			txmin = ttemp;
-		}
-
-		if (tmin > txmax || txmin > tmax)
-		{
-			return false;
-		}
-
-		if (tzmin > tmin)
-		{
-			tmin = tzmin;
-		}
-
-		if (tzmax < tmax)
-		{
-			tmax = tzmax;
-		}
-
-		OutHitPoint = Origin + Direction * tmin;
-
-		if (HittableActor != nullptr)
-		{
-			HittableActor->OnHit(this, OutHitPoint);
-		}
-
-		return true;
-	}
+	virtual bool HasBeenHit(const FVector& Origin, const FVector& Direction, FVector& OutHitPoint) const override;
 
 	const FVector& GetMinBounds() const { return MinBounds; }
 	void SetMinBounds(const FVector& NewMinBounds) { MinBounds = NewMinBounds; }
@@ -180,10 +74,10 @@ struct FCustomBoxRaycastCollider : public FCustomRaycastBaseCollider
 	void SetMaxBounds(const FVector& NewMaxBounds) { MaxBounds = NewMaxBounds; }
 
 protected:
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(EditAnywhere)
 	FVector MinBounds;
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(EditAnywhere)
 	FVector MaxBounds;
 };
 
@@ -192,46 +86,7 @@ struct FCustomPlaneRaycastCollider : public FCustomRaycastBaseCollider
 {
 	GENERATED_USTRUCT_BODY()
 
-	virtual bool HasBeenHit(const FVector& Origin, const FVector& Direction, FVector& OutHitPoint) const override
-	{
-		constexpr float ParallelRayThreshold = 0.000015f;
-		constexpr float PointOnPlaneThreshold = 0.000015f;
-
-		float Denominator = FVector::DotProduct(Direction, Normal);
-		if (abs(Denominator) < ParallelRayThreshold)
-		{
-			if (abs(PlaneEquation(Origin, Direction)) < PointOnPlaneThreshold)
-			{
-				OutHitPoint = Origin;
-
-				if (HittableActor != nullptr)
-				{
-					HittableActor->OnHit(this, OutHitPoint);
-				}
-
-				return true;
-			}
-
-			return false;
-		}
-
-		float t = -PlaneEquation(Origin, Direction);
-		t /= Denominator;
-
-		if (t >= 0)
-		{
-			OutHitPoint = Origin + Direction * t;
-
-			if (HittableActor != nullptr)
-			{
-				HittableActor->OnHit(this, OutHitPoint);
-			}
-
-			return true;
-		}
-
-		return false;
-	}
+	virtual bool HasBeenHit(const FVector& Origin, const FVector& Direction, FVector& OutHitPoint) const override;
 
 	const FVector& GetNormal() const { return Normal; }
 	void SetNormal(const FVector& NewNormal) { Normal = NewNormal; }

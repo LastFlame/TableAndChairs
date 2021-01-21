@@ -141,12 +141,12 @@ struct FCustomCubeQuads
 
 struct FCustomCubeMeshData
 {
-	FCustomCubeQuads* Positions;
-	FCustomCubeQuads* Normals;
+	FCustomCubeQuads* Positions = nullptr;
+	FCustomCubeQuads* Normals = nullptr;
 };
 
 struct FCustomQuadMeshData
 {
-	FCustomQuadVertices* Positions;
-	FCustomQuadVertices* Normals;
+	FCustomQuadVertices* Positions = nullptr;
+	FCustomQuadVertices* Normals = nullptr;
 };

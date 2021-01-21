@@ -67,7 +67,6 @@ void ACustomPawn::ShootRaycast()
 
 	CustomRaycastSystem::FCustomLinecastResult LinecastResult;
 
-	FlushPersistentDebugLines(GetWorld());
 	DrawDebugLine(GetWorld(), GetActorLocation(), GetActorLocation() + WorldDirection * 10000.0f, FColor::Green, false, 10.0f);
 
 	if (CustomRaycastSystem::Raycast(WorldLocation, WorldDirection, LinecastResult))

@@ -13,6 +13,7 @@ class TAC_API UCustomSphereComponent : public UProceduralMeshComponent
 	GENERATED_BODY()
 
 public:
+	UFUNCTION(CallInEditor)
 	void Draw();
 	void Draw(const FVector& Location, float Radius);
 
@@ -30,10 +31,10 @@ public:
 	FCustomSphereRaycastCollider* GetCollider() { return &CustomSphereCollider; }
 
 private:
-	UPROPERTY(EditAnywhere, Category = "Custom")
+	UPROPERTY(EditAnywhere, Category = "Custom transform")
 	FCustomSphereTransform CustomTransform;
 
-	UPROPERTY(EditAnywhere, Category = "Custom")
+	UPROPERTY(EditAnywhere, Category = "Custom colliders")
 	FCustomSphereRaycastCollider CustomSphereCollider;
 
 	UPROPERTY()
