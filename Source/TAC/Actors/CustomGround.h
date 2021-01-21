@@ -4,8 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "CustomRaycastTypes.h"
-#include "CustomQuadComponent.h"
+#include "TAC/CustomLinecast/CustomRaycastTypes.h"
+#include "TAC/CustomShapes/Components/CustomQuadComponent.h"
 
 #include "CustomGround.generated.h"
 
@@ -25,7 +25,7 @@ public:
 	virtual void OnHit(const FCustomRaycastBaseCollider* Collider, const FVector& HitPoint) override {};
 	virtual TWeakObjectPtr<AActor> GetActor() const override { return (AActor*)this; }
 	virtual const FCustomRaycastBaseCollider* GetBoundCollider() const override { return QuadComponent->GetCollider(); }
-	virtual const TArray<FCustomRaycastBaseCollider*>& GetColliders() const override { return RaycastColliders; }
+	virtual const CustomRaycastCollidersArray& GetColliders() const override { return RaycastCollidersArray; }
 
 private:
 	UPROPERTY(EditAnywhere, Category = "Components")
@@ -34,5 +34,5 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Components")
 	UCustomQuadComponent* QuadComponent;
 
-	TArray<FCustomRaycastBaseCollider*> RaycastColliders;
+	CustomRaycastCollidersArray RaycastCollidersArray;
 };

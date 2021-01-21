@@ -3,8 +3,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "CustomRaycastTypes.h"
-#include "CustomShapesTypes.h"
+#include "TAC/CustomLinecast/CustomRaycastTypes.h"
+#include "TAC/CustomShapes/CustomShapesTypes.h"
 #include "CustomSphereComponent.generated.h"
 
 UCLASS(hideCategories = "ProceduralMesh")
@@ -19,9 +19,6 @@ public:
 
 	void GenerateCollider();
 	void GenerateCollider(const FVector& Location, float Radius);
-
-protected:
-	virtual void BeginPlay() override;
 
 public:
 	const FCustomSphereTransform& GetTransform() const { return CustomTransform; }

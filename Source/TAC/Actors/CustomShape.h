@@ -4,9 +4,9 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "CustomShapesTypes.h"
-#include "CustomRaycastTypes.h"
-#include "CustomTableComponent.h"
+#include "TAC/CustomShapes/CustomShapesTypes.h"
+#include "TAC/CustomLinecast/CustomRaycastTypes.h"
+#include "TAC/CustomShapes/Components/CustomTableComponent.h"
 #include "CustomShape.generated.h"
 
 class USceneComponent;
@@ -32,7 +32,7 @@ public:
 	virtual void OnHit(const FCustomRaycastBaseCollider* Collider, const FVector& HitPoint) override;
 	virtual TWeakObjectPtr<AActor> GetActor() const override { return (AActor*)this; }
 	virtual const FCustomRaycastBaseCollider* GetBoundCollider() const { return TableComponent->GetCollider();  }
-	virtual const TArray<FCustomRaycastBaseCollider*>& GetColliders() const override { return RaycastColliders; }
+	virtual const CustomRaycastCollidersArray& GetColliders() const override { return RaycastCollidersArray; }
 
 	const FCustomCubeTransform& GetCustomTransform() const { return TableComponent->GetTransform(); }
 	FCustomCubeTransform& GetCustomTransform() { return TableComponent->GetTransform(); }
@@ -77,5 +77,5 @@ private:
 	UPROPERTY()
 	UCustomSphereComponent* HitSphere;
 
-	TArray<FCustomRaycastBaseCollider*> RaycastColliders;
+	CustomRaycastCollidersArray RaycastCollidersArray;
 };

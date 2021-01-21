@@ -2,20 +2,7 @@
 
 
 #include "CustomSphereComponent.h"
-#include "CustomShapesRenderer.h"
-
-void UCustomSphereComponent::BeginPlay()
-{
-	Super::BeginPlay();
-
-	ICustomRaycastHittable* HittableOwner = Cast<ICustomRaycastHittable>(GetOwner());
-	if (HittableOwner == nullptr)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("%s owner must implment ICustomRaycastHittable to receive collision events"), *GetName());
-	}
-
-	CustomSphereCollider.SetHittableActor(HittableOwner);
-}
+#include "TAC/CustomShapes/CustomShapesRenderer.h"
 
 void UCustomSphereComponent::Draw()
 {

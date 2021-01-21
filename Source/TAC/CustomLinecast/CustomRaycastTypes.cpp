@@ -27,11 +27,6 @@ bool FCustomSphereRaycastCollider::HasBeenHit(const FVector& Origin, const FVect
 		bCollisionPointFound = true;
 	}
 
-	if (bCollisionPointFound && HittableActor != nullptr)
-	{
-		HittableActor->OnHit(this, OutHitPoint);
-	}
-
 	return bCollisionPointFound;
 }
 
@@ -85,11 +80,6 @@ bool FCustomBoxRaycastCollider::HasBeenHit(const FVector& Origin, const FVector&
 	// If the code has reach this point, there's an intersection
 	OutHitPoint = Origin + Direction * (TNear > 0.0f ? TNear : TFar);
 
-	if (HittableActor != nullptr)
-	{
-		HittableActor->OnHit(this, OutHitPoint);
-	}
-
 	return true;
 }
 
@@ -123,14 +113,22 @@ bool FCustomPlaneRaycastCollider::HasBeenHit(const FVector& Origin, const FVecto
 	if (t >= 0)
 	{
 		OutHitPoint = Origin + Direction * t;
-
-		if (HittableActor != nullptr)
-		{
-			HittableActor->OnHit(this, OutHitPoint);
-		}
-
 		return true;
 	}
 
 	return false;
+}
+
+CustomRaycastCollidersArray::CustomRaycastCollidersArray(ICustomRaycastHittable* Owner) : Owner(Owner) {}
+
+void CustomRaycastCollidersArray::Add(FCustomRaycastBaseCollider* Element)
+{
+	Element->SetHittableActor(Owner);
+	RaycastCollidersArray.Add(Element);
+}
+
+void CustomRaycastCollidersArray::RemoveAt(int32_t Idx)
+{
+	RaycastCollidersArray[Idx]->SetHittableActor(nullptr);
+	RaycastCollidersArray.RemoveAt(Idx);
 }

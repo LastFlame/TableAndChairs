@@ -2,25 +2,12 @@
 
 
 #include "CustomQuadComponent.h"
-#include "CustomShapesRenderer.h"
+#include "TAC/CustomShapes/CustomShapesRenderer.h"
 #include "DrawDebugHelpers.h"
 
 UCustomQuadComponent::UCustomQuadComponent(const FObjectInitializer& ObjectInitializer) : UProceduralMeshComponent(ObjectInitializer)
 {
 	CustomTransform.Rotation.Y = 90.0f;
-}
-
-void UCustomQuadComponent::BeginPlay()
-{
-	Super::BeginPlay();
-
-	ICustomRaycastHittable* HittableOwner = Cast<ICustomRaycastHittable>(GetOwner());
-	if (HittableOwner == nullptr)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("%s owner must implment ICustomRaycastHittable to receive collision events"), *GetName());
-	}
-
-	CustomBoxCollider.SetHittableActor(HittableOwner);
 }
 
 void UCustomQuadComponent::Draw()

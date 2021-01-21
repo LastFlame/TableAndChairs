@@ -2,11 +2,11 @@
 
 
 #include "CustomShape.h"
-#include "CustomSphereComponent.h"
+#include "TAC/CustomShapes/Components/CustomSphereComponent.h"
 #include "DrawDebugHelpers.h"
-#include "CustomShapesRenderer.h"
+#include "TAC/CustomShapes/CustomShapesRenderer.h"
 
-ACustomShape::ACustomShape()
+ACustomShape::ACustomShape() : RaycastCollidersArray(this)
 {
 	SceneComponent = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
 	RootComponent = SceneComponent;
@@ -38,12 +38,10 @@ ACustomShape::ACustomShape()
 		SelectedTableMaterial = (UMaterial*)TableMaterial.Object;
 	}
 	
-	RaycastColliders.Add(TopRightSphereComponent->GetCollider());
-	RaycastColliders.Add(BottomRightSphereComponent->GetCollider());
-	RaycastColliders.Add(TopLeftSphereComponent->GetCollider());
-	RaycastColliders.Add(BottomLeftSphereComponent->GetCollider());
-
-	
+	RaycastCollidersArray.Add(TopRightSphereComponent->GetCollider());
+	RaycastCollidersArray.Add(BottomRightSphereComponent->GetCollider());
+	RaycastCollidersArray.Add(TopLeftSphereComponent->GetCollider());
+	RaycastCollidersArray.Add(BottomLeftSphereComponent->GetCollider());
 }
 
 void ACustomShape::Generate()

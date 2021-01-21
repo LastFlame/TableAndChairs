@@ -2,7 +2,7 @@
 
 
 #include "CustomTableComponent.h"
-#include "CustomShapesRenderer.h"
+#include "TAC/CustomShapes/CustomShapesRenderer.h"
 #include "GenericPlatform/GenericPlatformMath.h"
 
 UCustomTableComponent::UCustomTableComponent(const FObjectInitializer& ObjectInitializer) : UProceduralMeshComponent(ObjectInitializer),
@@ -91,19 +91,6 @@ void UCustomTableComponent::GenerateCollider(const FVector& MinBounds, const FVe
 {
 	CustomBoxCollider.SetMinBounds(MinBounds);
 	CustomBoxCollider.SetMaxBounds(MaxBounds);
-}
-
-void UCustomTableComponent::BeginPlay()
-{
-	Super::BeginPlay();
-	
-	ICustomRaycastHittable* HittableOwner = Cast<ICustomRaycastHittable>(GetOwner());
-	if (HittableOwner == nullptr)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("%s owner must implment ICustomRaycastHittable to receive collision events"), *GetName());
-	}
-
-	CustomBoxCollider.SetHittableActor(HittableOwner);
 }
 
 FCustomCubeMeshData UCustomTableComponent::DrawTable(const FCustomCubeTransform& Transform, const FVector2D& LegsSize)

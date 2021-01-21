@@ -3,8 +3,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "CustomRaycastTypes.h"
-#include "CustomShapesTypes.h"
+#include "TAC/CustomLinecast/CustomRaycastTypes.h"
+#include "TAC/CustomShapes/CustomShapesTypes.h"
 #include "CustomTableComponent.generated.h"
 
 UCLASS(hideCategories = "ProceduralMesh")
@@ -23,9 +23,6 @@ public:
 
 	void GenerateCollider();
 	void GenerateCollider(const FVector& MinBounds, const FVector& MaxBounds);
-
-protected:
-	virtual void BeginPlay() override;
 
 private:
 	FCustomCubeMeshData DrawTable(const FCustomCubeTransform& Transform, const FVector2D& LegsSize);

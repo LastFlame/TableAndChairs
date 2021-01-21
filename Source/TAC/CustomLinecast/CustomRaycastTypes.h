@@ -6,6 +6,24 @@
 #include "UObject/Interface.h"
 #include "CustomRaycastTypes.generated.h"
 
+class CustomRaycastCollidersArray
+{
+public:
+	CustomRaycastCollidersArray() {};
+	CustomRaycastCollidersArray(class ICustomRaycastHittable* Owner);
+
+public:
+	void Add(struct FCustomRaycastBaseCollider* Element);
+	void RemoveAt(int32_t Idx);
+
+public:
+	const TArray<struct FCustomRaycastBaseCollider*>& GetArray() const { return RaycastCollidersArray; }
+
+protected:
+	class ICustomRaycastHittable* Owner;
+	TArray<struct FCustomRaycastBaseCollider*> RaycastCollidersArray;
+};
+
 UINTERFACE(MinimalAPI)
 class UCustomRaycastHittable : public UInterface
 {
@@ -19,7 +37,7 @@ class TAC_API ICustomRaycastHittable
 public:
 	virtual TWeakObjectPtr<AActor> GetActor() const = 0;
 	virtual const FCustomRaycastBaseCollider* GetBoundCollider() const = 0;
-	virtual const TArray<FCustomRaycastBaseCollider*>& GetColliders() const = 0;
+	virtual const CustomRaycastCollidersArray& GetColliders() const = 0;
 
 	virtual void OnHit(const FCustomRaycastBaseCollider* Collider, const FVector& HitPoint) = 0;
 };

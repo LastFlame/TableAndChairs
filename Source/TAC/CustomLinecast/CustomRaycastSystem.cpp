@@ -19,7 +19,6 @@ namespace CustomRaycastSystem {
 
 		float PrevHitPointDistance = TNumericLimits<float>::Max();
 
-		UE_LOG(LogTemp, Warning, TEXT("RaycastSystemContainer count %d"), RaycastSystemContainer->GetHittableActors().Num());
 		for (ICustomRaycastHittable* HittableActor : RaycastSystemContainer->GetHittableActors())
 		{
 			FVector HitPoint;
@@ -41,7 +40,7 @@ namespace CustomRaycastSystem {
 
 		if (OutLinecastResult.HitActor != nullptr)
 		{
-			for (FCustomRaycastBaseCollider* RaycastCollider : OutLinecastResult.HitActor->GetColliders())
+			for (FCustomRaycastBaseCollider* RaycastCollider : OutLinecastResult.HitActor->GetColliders().GetArray())
 			{
 				FVector HitPoint;
 				if (!RaycastCollider->HasBeenHit(Origin, Direction, HitPoint))
@@ -57,8 +56,14 @@ namespace CustomRaycastSystem {
 					OutLinecastResult.HitPoint = HitPoint;
 				}
 			}
-		}
 
+
+			if (OutLinecastResult.HitCollider != nullptr)
+			{
+				OutLinecastResult.HitActor->OnHit(OutLinecastResult.HitCollider, OutLinecastResult.HitPoint);
+			}
+
+		}
 		return OutLinecastResult.HitActor != nullptr;
 	}
 

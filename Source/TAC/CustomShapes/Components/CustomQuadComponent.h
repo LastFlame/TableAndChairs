@@ -3,8 +3,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "CustomRaycastTypes.h"
-#include "CustomShapesTypes.h"
+#include "TAC/CustomLinecast/CustomRaycastTypes.h"
+#include "TAC/CustomShapes/CustomShapesTypes.h"
 #include "CustomQuadComponent.generated.h"
 
 UCLASS(hideCategories = "ProceduralMesh", ClassGroup = Custom, meta = (BlueprintSpawnableComponent))
@@ -22,9 +22,6 @@ public:
 
 	void GenerateCollider();
 	void GenerateCollider(const FVector& Location, const FVector2D& Size);
-
-protected:
-	virtual void BeginPlay() override;
 
 public:
 	const FCustomQuadTransform& GetTransform() const { return CustomTransform; }
