@@ -41,8 +41,8 @@ public:
 	const FCustomCubeTransform& GetTransform() const { return CustomTransform; }
 	FCustomCubeTransform& GetTransform() { return CustomTransform; }
 
-	const FCustomBoxRaycastCollider* GetCollider() const { return &CustomBoxCollider; }
-	FCustomBoxRaycastCollider* GetCollider() { return &CustomBoxCollider; }
+	const FCustomBoxRaycastCollider& GetCollider() const { return CustomBoxCollider; }
+	FCustomBoxRaycastCollider& GetCollider() { return CustomBoxCollider; }
 
 	const FCustomShapeBuffers& GetCustomShapeBuffer() const { return CustomShapeBuffers; }
 

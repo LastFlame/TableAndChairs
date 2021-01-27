@@ -56,11 +56,6 @@ private:
 	UPROPERTY(EditAnywhere)
 	float PanSpeed;
 
-	UPROPERTY()
-	class ACustomShape* DraggableActor;
-
-	struct FCustomRaycastBaseCollider* DraggableCollider;
-
 	FVector PanVector;
 
 	APlayerController* PlayerController;

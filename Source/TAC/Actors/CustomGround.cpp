@@ -3,7 +3,7 @@
 
 #include "CustomGround.h"
 
-ACustomGround::ACustomGround() : RaycastCollidersArray(this)
+ACustomGround::ACustomGround() : RaycastCollidersArray(*this)
 {
 	SceneComponent = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
 	RootComponent = SceneComponent;

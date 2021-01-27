@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "UObject/WeakInterfacePtr.h"
 #include "UObject/NoExportTypes.h"
 #include "CustomRaycastTypes.h"
 #include "CustomRaycastSystemContainer.generated.h"
@@ -17,7 +18,7 @@ public:
 	void Init(class UWorld* World);
 
 public:
-	const TArray<ICustomRaycastHittable*>& GetHittableActors() const { return HittableActors; }
+	const TArray<TWeakInterfacePtr<ICustomRaycastHittable>>& GetHittableActors() const { return HittableActors; }
 
 private:
 	UFUNCTION()
@@ -27,5 +28,5 @@ private:
 	void OnActorSpawned(AActor* SpawnedActor);
 
 private:
-	TArray<ICustomRaycastHittable*> HittableActors;
+	TArray<TWeakInterfacePtr<ICustomRaycastHittable>> HittableActors;
 };

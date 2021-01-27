@@ -14,13 +14,13 @@ void UCustomRaycastSystemContainer::Init(UWorld* World)
 	{
 		AActor* Actor = *ActorItr;
 
-		ICustomRaycastHittable* HittableActor = Cast<ICustomRaycastHittable>(Actor);
-		if (HittableActor == nullptr)
+		ICustomRaycastHittable* CustomHittableActor = Cast<ICustomRaycastHittable>(Actor);
+		if (CustomHittableActor == nullptr)
 		{
 			continue;
 		}
-
-		HittableActors.Add(HittableActor);
+		
+		HittableActors.Add(*CustomHittableActor);
 		Actor->OnDestroyed.AddDynamic(this, &UCustomRaycastSystemContainer::OnActorDestoryed);
 	}
 
@@ -30,14 +30,13 @@ void UCustomRaycastSystemContainer::Init(UWorld* World)
 
 void UCustomRaycastSystemContainer::OnActorDestoryed(AActor* DestroyedActor)
 {
-	ICustomRaycastHittable* HittableActor = Cast<ICustomRaycastHittable>(DestroyedActor);
-
-	if (HittableActor == nullptr)
+	ICustomRaycastHittable* CustomHittableActor = Cast<ICustomRaycastHittable>(DestroyedActor);
+	if (CustomHittableActor == nullptr)
 	{
 		return;
 	}
 
-	int32_t HittableActorIdx = HittableActors.Find(HittableActor);
+	int32_t HittableActorIdx = HittableActors.Find(*CustomHittableActor);
 
 	if (HittableActorIdx == INDEX_NONE)
 	{
@@ -51,13 +50,12 @@ void UCustomRaycastSystemContainer::OnActorDestoryed(AActor* DestroyedActor)
 
 void UCustomRaycastSystemContainer::OnActorSpawned(AActor* SpawnedActor)
 {
-	ICustomRaycastHittable* HittableActor = Cast<ICustomRaycastHittable>(SpawnedActor);
-
-	if (HittableActor == nullptr)
+	ICustomRaycastHittable* CustomHittableActor = Cast<ICustomRaycastHittable>(SpawnedActor);
+	if (CustomHittableActor == nullptr)
 	{
 		return;
 	}
 
-	HittableActors.Add(HittableActor);
+	HittableActors.Add(*CustomHittableActor);
 	SpawnedActor->OnDestroyed.AddDynamic(this, &UCustomRaycastSystemContainer::OnActorDestoryed);
 }

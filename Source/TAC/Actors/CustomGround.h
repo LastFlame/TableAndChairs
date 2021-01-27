@@ -22,10 +22,10 @@ public:
 	void Generate();
 
 public:
-	virtual void OnHit(const FCustomRaycastBaseCollider* Collider, const FVector& HitPoint) override {};
-	virtual TWeakObjectPtr<AActor> GetActor() const override { return (AActor*)this; }
-	virtual const FCustomRaycastBaseCollider* GetBoundCollider() const override { return QuadComponent->GetCollider(); }
+	/* ICustomRaycastHittable interface */
+	virtual const FCustomRaycastBaseCollider& GetBoundCollider() const override { return QuadComponent->GetCollider(); }
 	virtual const CustomRaycastCollidersArray& GetColliders() const override { return RaycastCollidersArray; }
+	/***********************************/
 
 private:
 	UPROPERTY(EditAnywhere, Category = "Components")

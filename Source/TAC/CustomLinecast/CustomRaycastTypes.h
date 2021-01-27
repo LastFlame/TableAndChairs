@@ -4,23 +4,28 @@
 
 #include "CoreMinimal.h"
 #include "UObject/Interface.h"
+#include "UObject/WeakInterfacePtr.h"
 #include "CustomRaycastTypes.generated.h"
+
+DECLARE_MULTICAST_DELEGATE_OneParam(FCustomLinecastColliderHitSignature, const FVector&);
+DECLARE_MULTICAST_DELEGATE(FCustomLinecastColliderHitChangedSignature);
+
 
 class CustomRaycastCollidersArray
 {
 public:
 	CustomRaycastCollidersArray() {};
-	CustomRaycastCollidersArray(class ICustomRaycastHittable* Owner);
+	CustomRaycastCollidersArray(class ICustomRaycastHittable& Owner);
 
 public:
-	void Add(struct FCustomRaycastBaseCollider* Element);
+	void Add(struct FCustomRaycastBaseCollider& Element);
 	void RemoveAt(int32_t Idx);
 
 public:
 	const TArray<struct FCustomRaycastBaseCollider*>& GetArray() const { return RaycastCollidersArray; }
 
 protected:
-	class ICustomRaycastHittable* Owner;
+	TWeakInterfacePtr<class ICustomRaycastHittable> Owner;
 	TArray<struct FCustomRaycastBaseCollider*> RaycastCollidersArray;
 };
 
@@ -35,11 +40,8 @@ class TAC_API ICustomRaycastHittable
 	GENERATED_BODY()
 
 public:
-	virtual TWeakObjectPtr<AActor> GetActor() const = 0;
-	virtual const FCustomRaycastBaseCollider* GetBoundCollider() const = 0;
-	virtual const CustomRaycastCollidersArray& GetColliders() const = 0;
-
-	virtual void OnHit(const FCustomRaycastBaseCollider* Collider, const FVector& HitPoint) = 0;
+	virtual const FCustomRaycastBaseCollider& GetBoundCollider() const = 0;
+	virtual const class CustomRaycastCollidersArray& GetColliders() const = 0;
 };
 
 USTRUCT()
@@ -47,20 +49,31 @@ struct TAC_API FCustomRaycastBaseCollider
 {
 	GENERATED_USTRUCT_BODY()
 
+	FCustomRaycastBaseCollider() {}
+	virtual ~FCustomRaycastBaseCollider() { }
+
+public:
 	virtual bool HasBeenHit(const FVector& Origin, const FVector& Direction, FVector& OutHitPoint) const { return false; }
+
+public:
+	FCustomLinecastColliderHitSignature OnHit;	
+	FCustomLinecastColliderHitChangedSignature OnHitChanged;
 
 	const FVector& GetLocation() const { return Location; }
 	void SetLocation(const FVector& NewLocation) { Location = NewLocation; }
 
-	const ICustomRaycastHittable* GetHittableActor() const { return HittableActor; }
-	ICustomRaycastHittable* GetHittableActor() { return HittableActor; }	
-	void SetHittableActor(ICustomRaycastHittable* NewHittableActor) { HittableActor = NewHittableActor; }
+	const TWeakInterfacePtr<ICustomRaycastHittable> GetHittableActor() const { return HittableActor; }
+	TWeakInterfacePtr<ICustomRaycastHittable> GetHittableActor() { return HittableActor; }
+
+	void SetHittableActor(ICustomRaycastHittable& NewHittableActor) { HittableActor = NewHittableActor; }
 
 protected:
 	UPROPERTY(EditAnywhere)
 	FVector Location;
 
-	ICustomRaycastHittable* HittableActor = nullptr;
+	TWeakInterfacePtr<ICustomRaycastHittable> HittableActor;
+
+	friend class CustomRaycastCollidersArray;
 };
 
 USTRUCT()

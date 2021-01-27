@@ -24,8 +24,8 @@ public:
 	const FCustomSphereTransform& GetTransform() const { return CustomTransform; }
 	FCustomSphereTransform& GetTransform() { return CustomTransform; }
 
-	const FCustomSphereRaycastCollider* GetCollider() const { return &CustomSphereCollider; }
-	FCustomSphereRaycastCollider* GetCollider() { return &CustomSphereCollider; }
+	const FCustomSphereRaycastCollider& GetCollider() const { return CustomSphereCollider; }
+	FCustomSphereRaycastCollider& GetCollider() { return CustomSphereCollider; }
 
 private:
 	UPROPERTY(EditAnywhere, Category = "Custom transform")

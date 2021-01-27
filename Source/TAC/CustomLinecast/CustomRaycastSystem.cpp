@@ -8,9 +8,14 @@ namespace CustomRaycastSystem {
 
 	static TWeakObjectPtr<UCustomRaycastSystemContainer> RaycastSystemContainer;
 
+	static TWeakInterfacePtr<ICustomRaycastHittable> PrevHitActor;
+	static FCustomRaycastBaseCollider* PrevHitCollider;
+
 	void Init(UCustomRaycastSystemContainer* CustomRaycastSystemContainer)
 	{
 		RaycastSystemContainer = CustomRaycastSystemContainer;
+		PrevHitActor = TWeakInterfacePtr<ICustomRaycastHittable>();
+		PrevHitCollider = nullptr;
 	}
 
 	bool Raycast(const FVector& Origin, const FVector& Direction, FCustomLinecastResult& OutLinecastResult)
@@ -19,10 +24,15 @@ namespace CustomRaycastSystem {
 
 		float PrevHitPointDistance = TNumericLimits<float>::Max();
 
-		for (ICustomRaycastHittable* HittableActor : RaycastSystemContainer->GetHittableActors())
+		for (TWeakInterfacePtr<ICustomRaycastHittable> HittableActor : RaycastSystemContainer->GetHittableActors())
 		{
+			if (!HittableActor.IsValid())
+			{
+				continue;
+			}
+
 			FVector HitPoint;
-			if (!HittableActor->GetBoundCollider()->HasBeenHit(Origin, Direction, HitPoint))
+			if (!HittableActor->GetBoundCollider().HasBeenHit(Origin, Direction, HitPoint))
 			{
 				continue;
 			}
@@ -36,14 +46,22 @@ namespace CustomRaycastSystem {
 			}
 		}
 
-		PrevHitPointDistance = TNumericLimits<float>::Max();
-
-		if (OutLinecastResult.HitActor != nullptr)
+		if (OutLinecastResult.HitActor.IsValid())
 		{
+			PrevHitPointDistance = TNumericLimits<float>::Max();
+
+			if (PrevHitActor.IsValid())
+			{
+				PrevHitActor->GetBoundCollider().OnHitChanged.Broadcast();
+			}
+
+			OutLinecastResult.HitActor->GetBoundCollider().OnHit.Broadcast(OutLinecastResult.HitPoint);
+			PrevHitActor = OutLinecastResult.HitActor;
+
 			for (FCustomRaycastBaseCollider* RaycastCollider : OutLinecastResult.HitActor->GetColliders().GetArray())
 			{
 				FVector HitPoint;
-				if (!RaycastCollider->HasBeenHit(Origin, Direction, HitPoint))
+				if (RaycastCollider != nullptr && !RaycastCollider->HasBeenHit(Origin, Direction, HitPoint))
 				{
 					continue;
 				}
@@ -57,23 +75,29 @@ namespace CustomRaycastSystem {
 				}
 			}
 
+			if (PrevHitCollider != nullptr && PrevHitCollider->GetHittableActor().IsValid())
+			{
+				PrevHitCollider->OnHitChanged.Broadcast();
+			}
 
 			if (OutLinecastResult.HitCollider != nullptr)
 			{
-				OutLinecastResult.HitActor->OnHit(OutLinecastResult.HitCollider, OutLinecastResult.HitPoint);
+				OutLinecastResult.HitCollider->OnHit.Broadcast(OutLinecastResult.HitPoint);
 			}
 
+			PrevHitCollider = OutLinecastResult.HitCollider;
 		}
-		return OutLinecastResult.HitActor != nullptr;
+
+		return OutLinecastResult.HitActor.IsValid();
 	}
 
-	FCustomLinecastResult::FCustomLinecastResult() : HitActor(nullptr), HitCollider(nullptr), HitPoint(0.0f, 0.0f, 0.0f)
+	FCustomLinecastResult::FCustomLinecastResult() : HitActor(), HitCollider(nullptr), HitPoint(0.0f, 0.0f, 0.0f)
 	{
 	}
 
 	void FCustomLinecastResult::Reset()
 	{
-		HitActor = nullptr;
+		HitActor = TWeakInterfacePtr<ICustomRaycastHittable>();
 		HitCollider = nullptr;
 		HitPoint = { 0.0f, 0.0f, 0.0f };
 	}

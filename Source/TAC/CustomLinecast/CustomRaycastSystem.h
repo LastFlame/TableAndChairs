@@ -18,12 +18,12 @@ namespace CustomRaycastSystem {
 		void Reset();
 
 	public:
-		ICustomRaycastHittable* const GetHitActor() const { return HitActor; }
+		TWeakInterfacePtr<ICustomRaycastHittable> const GetHitActor() const { return HitActor; }
 		FCustomRaycastBaseCollider* const GetHitCollider() const { return HitCollider; }
 		const FVector& GetHitPoint() const { return HitPoint; }
 
 	private:
-		ICustomRaycastHittable* HitActor;
+		TWeakInterfacePtr<ICustomRaycastHittable> HitActor;
 		FCustomRaycastBaseCollider* HitCollider;
 		FVector HitPoint;
 

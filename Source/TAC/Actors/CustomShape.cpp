@@ -6,7 +6,7 @@
 #include "DrawDebugHelpers.h"
 #include "TAC/CustomShapes/CustomShapesRenderer.h"
 
-ACustomShape::ACustomShape() : RaycastCollidersArray(this)
+ACustomShape::ACustomShape() : RaycastCollidersArray(*this)
 {
 	SceneComponent = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
 	RootComponent = SceneComponent;
@@ -29,19 +29,27 @@ ACustomShape::ACustomShape() : RaycastCollidersArray(this)
 	static ConstructorHelpers::FObjectFinder<UMaterial> SphereMaterial(TEXT("Material'/Game/StarterContent/Materials/M_Metal_Gold.M_Metal_Gold'"));
 	if (SphereMaterial.Object != NULL)
 	{
-		SelectedSphereMaterial = (UMaterial*)SphereMaterial.Object;
+		OnSphereSelectedMat = (UMaterial*)SphereMaterial.Object;
 	}
 
 	static ConstructorHelpers::FObjectFinder<UMaterial> TableMaterial(TEXT("Material'/Game/StarterContent/Materials/M_Basic_Floor.M_Basic_Floor'"));
 	if (SphereMaterial.Object != NULL)
 	{
-		SelectedTableMaterial = (UMaterial*)TableMaterial.Object;
+		OnSelectedTableMat = (UMaterial*)TableMaterial.Object;
 	}
 	
 	RaycastCollidersArray.Add(TopRightSphereComponent->GetCollider());
 	RaycastCollidersArray.Add(BottomRightSphereComponent->GetCollider());
 	RaycastCollidersArray.Add(TopLeftSphereComponent->GetCollider());
 	RaycastCollidersArray.Add(BottomLeftSphereComponent->GetCollider());
+
+	TableComponent->GetCollider().OnHit.AddUObject(this, &ACustomShape::OnBoundColliderHit);
+	TableComponent->GetCollider().OnHitChanged.AddUObject(this, &ACustomShape::OnBoundColliderHitChanged);
+
+	TopRightSphereComponent->GetCollider().OnHit.AddUObject(this, &ACustomShape::OnTopRightSphereHit);
+	BottomRightSphereComponent->GetCollider().OnHit.AddUObject(this, &ACustomShape::OnBottomRightSphereHit);
+	TopLeftSphereComponent->GetCollider().OnHit.AddUObject(this, &ACustomShape::OnTopLeftSphereHit);
+	BottomLeftSphereComponent->GetCollider().OnHit.AddUObject(this, &ACustomShape::OnBottomLeftSphereHit);
 }
 
 void ACustomShape::Generate()
@@ -65,20 +73,20 @@ void ACustomShape::Generate()
 	BottomLeftSphereComponent->GenerateCollider();
 }
 
-bool ACustomShape::Drag(const FCustomRaycastBaseCollider* Collider, const FVector& DragLocation)
+bool ACustomShape::Drag(const FCustomRaycastBaseCollider& Collider, const FVector& DragLocation)
 {
 	if (TableComponent->GetCustomShapeBuffer().VertexBuffer.Num() == 0)
 	{
 		return false;
 	}
 
-	FCustomSphereRaycastCollider* SphereCollider = (FCustomSphereRaycastCollider*)Collider;
+	FCustomSphereRaycastCollider* SphereCollider = (FCustomSphereRaycastCollider*)&Collider;
 	if (SphereCollider == nullptr)
 	{
 		return false;
 	}
 
-	if (FVector::Distance(Collider->GetLocation(), DragLocation) < DragThreshold)
+	if (FVector::Distance(Collider.GetLocation(), DragLocation) < DragThreshold)
 	{
 		return false;
 	}
@@ -89,9 +97,9 @@ bool ACustomShape::Drag(const FCustomRaycastBaseCollider* Collider, const FVecto
 		(FCustomCubeQuads*)(&TableComponent->GetCustomShapeBuffer().NormalsBuffer[0])
 	};
 
-	FVector DragDir = (DragLocation - Collider->GetLocation()).GetSafeNormal();
+	FVector DragDir = (DragLocation - Collider.GetLocation()).GetSafeNormal();
 
-	if (TopRightSphereComponent->GetCollider() == SphereCollider)
+	if (&TopRightSphereComponent->GetCollider() == SphereCollider)
 	{
 		if (DragEdge(Table.Normals->BackQuad.TopRight, Table.Normals->RightQuad.TopRight, DragDir, DragThreshold, -DragThreshold))
 		{
@@ -100,7 +108,7 @@ bool ACustomShape::Drag(const FCustomRaycastBaseCollider* Collider, const FVecto
 		}
 	}
 
-	if (BottomRightSphereComponent->GetCollider() == SphereCollider)
+	if (&BottomRightSphereComponent->GetCollider() == SphereCollider)
 	{
 		if (DragEdge(Table.Normals->FrontQuad.TopRight, Table.Normals->RightQuad.TopRight, DragDir, -DragThreshold, -DragThreshold))
 		{
@@ -109,7 +117,7 @@ bool ACustomShape::Drag(const FCustomRaycastBaseCollider* Collider, const FVecto
 		}
 	}
 
-	if (TopLeftSphereComponent->GetCollider() == SphereCollider)
+	if (&TopLeftSphereComponent->GetCollider() == SphereCollider)
 	{
 		if (DragEdge(Table.Normals->BackQuad.TopRight, Table.Normals->LeftQuad.TopRight, DragDir, DragThreshold, DragThreshold))
 		{
@@ -118,7 +126,7 @@ bool ACustomShape::Drag(const FCustomRaycastBaseCollider* Collider, const FVecto
 		}
 	}
 
-	if (BottomLeftSphereComponent->GetCollider() == SphereCollider)
+	if (&BottomLeftSphereComponent->GetCollider() == SphereCollider)
 	{
 		if (DragEdge(Table.Normals->FrontQuad.TopRight, Table.Normals->LeftQuad.TopRight, DragDir, -DragThreshold, DragThreshold))
 		{
@@ -167,66 +175,74 @@ bool ACustomShape::DragEdge(const FVector& ForwardDir, const FVector& RightDir, 
 	return bDragged;
 }
 
-void ACustomShape::ResetSelection()
+void ACustomShape::OnBoundColliderHit(const FVector& HitPoint)
 {
-	UE_LOG(LogTemp, Warning, TEXT("CustomShape ResetSelection"));
-
-	TableComponent->SetMaterial(0, nullptr);
-	if (HitSphere != nullptr)
-	{
-		HitSphere->SetMaterial(0, nullptr);
-	}
+	TableComponent->SetMaterial(0, OnSelectedTableMat);
 }
 
-void ACustomShape::OnHit(const FCustomRaycastBaseCollider* Collider, const FVector& HitPoint)
+void ACustomShape::OnBoundColliderHitChanged()
 {
-	UE_LOG(LogTemp, Warning, TEXT("CustomShape on Hit"));
-
-	TableComponent->SetMaterial(0, SelectedTableMaterial);
-
-	FCustomSphereRaycastCollider* SphereCollider = (FCustomSphereRaycastCollider*)Collider;
-	if (SphereCollider == nullptr)
+	if (PrevHitSphere != nullptr)
 	{
-		return;
+		PrevHitSphere->SetMaterial(0, nullptr);
 	}
 
-	if (HitSphere != nullptr)
+	TableComponent->SetMaterial(0, nullptr);
+}
+
+void ACustomShape::OnTopRightSphereHit(const FVector& HitPoint)
+{
+	if (PrevHitSphere)
 	{
-		HitSphere->SetMaterial(0, nullptr);
+		PrevHitSphere->SetMaterial(0, nullptr);
 	}
 
-	if (TopRightSphereComponent->GetCollider() == SphereCollider)
+	TopRightSphereComponent->SetMaterial(0, OnSphereSelectedMat);
+	PrevHitSphere = TopRightSphereComponent;
+}
+
+void ACustomShape::OnBottomRightSphereHit(const FVector& HitPoint)
+{
+	if (PrevHitSphere)
 	{
-		HitSphere = TopRightSphereComponent;
-	}
-	else if (BottomRightSphereComponent->GetCollider() == SphereCollider)
-	{
-		HitSphere = BottomRightSphereComponent;
-	}
-	else if (TopLeftSphereComponent->GetCollider() == SphereCollider)
-	{
-		HitSphere = TopLeftSphereComponent;
-	}
-	else if (BottomLeftSphereComponent->GetCollider() == SphereCollider)
-	{
-		HitSphere = BottomLeftSphereComponent;
+		PrevHitSphere->SetMaterial(0, nullptr);
 	}
 
-	if (HitSphere != nullptr)
+	BottomRightSphereComponent->SetMaterial(0, OnSphereSelectedMat);
+	PrevHitSphere = BottomRightSphereComponent;
+}
+
+void ACustomShape::OnTopLeftSphereHit(const FVector& HitPoint)
+{
+	if (PrevHitSphere)
 	{
-		HitSphere->SetMaterial(0, SelectedSphereMaterial);
+		PrevHitSphere->SetMaterial(0, nullptr);
 	}
+
+	TopLeftSphereComponent->SetMaterial(0, OnSphereSelectedMat);
+	PrevHitSphere = TopLeftSphereComponent;
+}
+
+void ACustomShape::OnBottomLeftSphereHit(const FVector& HitPoint)
+{
+	if (PrevHitSphere)
+	{
+		PrevHitSphere->SetMaterial(0, nullptr);
+	}
+
+	BottomLeftSphereComponent->SetMaterial(0, OnSphereSelectedMat);
+	PrevHitSphere = BottomLeftSphereComponent;
 }
 
 void ACustomShape::ShowDebugBoxCollider() const
 {
-	if (TableComponent == nullptr || TableComponent->GetCollider() == nullptr)
+	if (TableComponent == nullptr)
 	{
 		return;
 	}
 
-	const FVector& BackBottomLeftStart = TableComponent->GetCollider()->GetMinBounds();
-	const FVector& FrontTopRightStart = TableComponent->GetCollider()->GetMaxBounds();
+	const FVector& BackBottomLeftStart = TableComponent->GetCollider().GetMinBounds();
+	const FVector& FrontTopRightStart = TableComponent->GetCollider().GetMaxBounds();
 
 	const float XSize = FrontTopRightStart.X - BackBottomLeftStart.X;
 	const float YSize = FrontTopRightStart.Y - BackBottomLeftStart.Y;

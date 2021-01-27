@@ -27,8 +27,8 @@ public:
 	const FCustomQuadTransform& GetTransform() const { return CustomTransform; }
 	FCustomQuadTransform& GetTransform() { return CustomTransform; }
 
-	const FCustomBoxRaycastCollider* GetCollider() const { return &CustomBoxCollider; }
-	FCustomBoxRaycastCollider* GetCollider() { return &CustomBoxCollider; }
+	const FCustomBoxRaycastCollider& GetCollider() const { return CustomBoxCollider; }
+	FCustomBoxRaycastCollider& GetCollider() { return CustomBoxCollider; }
 
 private:
 	UPROPERTY(EditAnywhere, Category = "Custom transform")

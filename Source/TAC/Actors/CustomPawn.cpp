@@ -9,6 +9,9 @@
 #include "TAC/CustomLinecast/CustomRaycastSystem.h"
 #include "GameFramework/FloatingPawnMovement.h"
 
+static TWeakObjectPtr<ACustomShape> DraggableActor;
+static FCustomRaycastBaseCollider* DraggableCollider = nullptr;
+
 static float X, Y;
 static float SavedMouseX, SavedMouseY;
 static bool bIsDragging = false;
@@ -69,32 +72,27 @@ void ACustomPawn::ShootRaycast()
 
 	DrawDebugLine(GetWorld(), GetActorLocation(), GetActorLocation() + WorldDirection * 10000.0f, FColor::Green, false, 10.0f);
 
+	DraggableActor.Reset();
+	DraggableCollider = nullptr;
+
 	if (CustomRaycastSystem::Raycast(WorldLocation, WorldDirection, LinecastResult))
 	{
-		TWeakObjectPtr<AActor> HitActor = LinecastResult.GetHitActor()->GetActor();
-		UE_LOG(LogTemp, Warning, TEXT("HitActor = {%s}. Location = {%s}."), *HitActor->GetName(), *LinecastResult.GetHitPoint().ToString());
+		UObject* HitObject = LinecastResult.GetHitActor().GetObject();
+		UE_LOG(LogTemp, Warning, TEXT("HitActor = {%s}. Location = {%s}."), *HitObject->GetName(), *LinecastResult.GetHitPoint().ToString());
 
 		DrawDebugSphere(GetWorld(), LinecastResult.GetHitPoint(), 5.0f, 15.0f, FColor::Red, false, 5.0f);
 
-		if (DraggableActor != nullptr && DraggableActor != HitActor)
-		{
-			DraggableActor->ResetSelection(); // TO DO IDraggable Method.
-		}
-
-		DraggableActor = nullptr;
-		DraggableCollider = nullptr;
-
-		if (HitActor->IsA(ACustomShape::StaticClass())) // TO DO IDraggable Interface.
+		if (HitObject->IsA(ACustomShape::StaticClass())) // TO DO IDraggable Interface.
 		{
 			PlayerController->GetMousePosition(SavedMouseX, SavedMouseY);
 			PlayerController->bShowMouseCursor = false;
 
-			DraggableActor = Cast<ACustomShape>(HitActor);
+			DraggableActor = Cast<ACustomShape>(HitObject);
 			DraggableCollider = LinecastResult.GetHitCollider();
 
 			bIsDragging = true;
 		}
-		else if (HitActor->IsA(ACustomGround::StaticClass()))
+		else if (HitObject->IsA(ACustomGround::StaticClass()))
 		{
 			ACustomShape* CustomShape = GetWorld()->SpawnActor<ACustomShape>(FVector::ZeroVector, FRotator::ZeroRotator);
 			CustomShape->SetCustomLocation(LinecastResult.GetHitPoint().X, LinecastResult.GetHitPoint().Y);
@@ -111,7 +109,7 @@ void ACustomPawn::EndDrag()
 
 void ACustomPawn::Drag() const
 {
-	if (DraggableActor == nullptr || DraggableCollider == nullptr)
+	if (!DraggableActor.IsValid() || DraggableCollider == nullptr || !DraggableCollider->GetHittableActor().IsValid())
 	{
 		return;
 	}
@@ -123,7 +121,7 @@ void ACustomPawn::Drag() const
 	WorldLocation += WorldDirection * ColliderToMouseProjDist;
 	WorldLocation.Z = DraggableCollider->GetLocation().Z;
 
-	if (DraggableActor->Drag(DraggableCollider, WorldLocation))
+	if (DraggableActor->Drag(*DraggableCollider, WorldLocation))
 	{
 		FVector2D MouseLoc;
 		PlayerController->ProjectWorldLocationToScreen(DraggableCollider->GetLocation(), MouseLoc);
@@ -177,12 +175,12 @@ void ACustomPawn::PanUp(float Value)
 
 void ACustomPawn::DestroySelectedActor()
 {
-	if (bIsDragging || DraggableActor == nullptr)
+	if (bIsDragging || !DraggableActor.IsValid())
 	{
 		return;
 	}
 
-	GetWorld()->DestroyActor(DraggableActor);
+	GetWorld()->DestroyActor(DraggableActor.Get());
 	DraggableCollider = nullptr;
 }
 

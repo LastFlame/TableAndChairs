@@ -1,5 +1,18 @@
 #include "CustomRaycastTypes.h"
 
+CustomRaycastCollidersArray::CustomRaycastCollidersArray(ICustomRaycastHittable& Owner) : Owner(Owner) {}
+
+void CustomRaycastCollidersArray::Add(FCustomRaycastBaseCollider& Element)
+{
+	Element.HittableActor = Owner;
+	RaycastCollidersArray.Add(&Element);
+}
+
+void CustomRaycastCollidersArray::RemoveAt(int32_t Idx)
+{
+	RaycastCollidersArray[Idx]->HittableActor = TWeakInterfacePtr<ICustomRaycastHittable>();
+	RaycastCollidersArray.RemoveAt(Idx);
+}
 
 bool FCustomSphereRaycastCollider::HasBeenHit(const FVector& Origin, const FVector& Direction, FVector& OutHitPoint) const
 {
@@ -95,12 +108,6 @@ bool FCustomPlaneRaycastCollider::HasBeenHit(const FVector& Origin, const FVecto
 		if (abs(PlaneEquation(Origin, Direction)) < PointOnPlaneThreshold)
 		{
 			OutHitPoint = Origin;
-
-			if (HittableActor != nullptr)
-			{
-				HittableActor->OnHit(this, OutHitPoint);
-			}
-
 			return true;
 		}
 
@@ -117,18 +124,4 @@ bool FCustomPlaneRaycastCollider::HasBeenHit(const FVector& Origin, const FVecto
 	}
 
 	return false;
-}
-
-CustomRaycastCollidersArray::CustomRaycastCollidersArray(ICustomRaycastHittable* Owner) : Owner(Owner) {}
-
-void CustomRaycastCollidersArray::Add(FCustomRaycastBaseCollider* Element)
-{
-	Element->SetHittableActor(Owner);
-	RaycastCollidersArray.Add(Element);
-}
-
-void CustomRaycastCollidersArray::RemoveAt(int32_t Idx)
-{
-	RaycastCollidersArray[Idx]->SetHittableActor(nullptr);
-	RaycastCollidersArray.RemoveAt(Idx);
 }
