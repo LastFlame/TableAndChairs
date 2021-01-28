@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "TAC/CustomShapes/CustomShapesTypes.h"
-#include "TAC/CustomLinecast/CustomRaycastTypes.h"
+#include "TAC/CustomCollisions/CustomColliders.h"
 #include "TAC/CustomShapes/Components/CustomTableComponent.h"
 #include "CustomShape.generated.h"
 
@@ -13,7 +13,7 @@ class USceneComponent;
 class UCustomSphereComponent;
 
 UCLASS()
-class TAC_API ACustomShape : public AActor, public ICustomRaycastHittable
+class TAC_API ACustomShape : public AActor, public ICustomHittable
 {
 	GENERATED_BODY()
 
@@ -24,13 +24,13 @@ public:
 	UFUNCTION(CallInEditor, Category = "Debug")
 	void Generate();
 
-	bool Drag(const FCustomRaycastBaseCollider& Collider, const FVector& DragLocation);
+	bool Drag(const FCustomBaseCollider& Collider, const FVector& DragLocation);
 	bool DragEdge(const FVector& ForwardDir, const FVector& RightDir, const FVector& DragDir, float ForwardDragDistance, float RightDragDistance);
 
 public:
 	/* ICustomRaycastHittable interface */
-	virtual const FCustomRaycastBaseCollider& GetBoundCollider() const { return TableComponent->GetCollider();  }
-	virtual const CustomRaycastCollidersArray& GetColliders() const override { return RaycastCollidersArray; }
+	virtual const FCustomBaseCollider& GetBoundCollider() const { return TableComponent->GetCollider();  }
+	virtual const CustomCollidersArray& GetColliders() const override { return RaycastCollidersArray; }
 	/***********************************/
 
 public:
@@ -94,5 +94,5 @@ private:
 	UPROPERTY()
 	UCustomSphereComponent* PrevHitSphere;
 
-	CustomRaycastCollidersArray RaycastCollidersArray;
+	CustomCollidersArray RaycastCollidersArray;
 };

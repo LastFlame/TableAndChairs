@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "TAC/CustomLinecast/CustomRaycastTypes.h"
+#include "TAC/CustomCollisions/CustomColliders.h"
 #include "TAC/CustomShapes/CustomShapesTypes.h"
 #include "CustomTableComponent.generated.h"
 
@@ -41,8 +41,8 @@ public:
 	const FCustomCubeTransform& GetTransform() const { return CustomTransform; }
 	FCustomCubeTransform& GetTransform() { return CustomTransform; }
 
-	const FCustomBoxRaycastCollider& GetCollider() const { return CustomBoxCollider; }
-	FCustomBoxRaycastCollider& GetCollider() { return CustomBoxCollider; }
+	const FCustomBoxCollider& GetCollider() const { return CustomBoxCollider; }
+	FCustomBoxCollider& GetCollider() { return CustomBoxCollider; }
 
 	const FCustomShapeBuffers& GetCustomShapeBuffer() const { return CustomShapeBuffers; }
 
@@ -53,7 +53,7 @@ private:
 	FCustomCubeTransform CustomTransform;
 
 	UPROPERTY(EditAnywhere, Category = "Custom colliders")
-	FCustomBoxRaycastCollider CustomBoxCollider;
+	FCustomBoxCollider CustomBoxCollider;
 
 	UPROPERTY(EditAnywhere, Category = "Table values")
 	FVector2D TableLegsSize;

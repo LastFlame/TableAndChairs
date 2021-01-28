@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "TAC/CustomLinecast/CustomRaycastTypes.h"
+#include "TAC/CustomCollisions/CustomColliders.h"
 #include "TAC/CustomShapes/CustomShapesTypes.h"
 #include "CustomSphereComponent.generated.h"
 
@@ -24,15 +24,15 @@ public:
 	const FCustomSphereTransform& GetTransform() const { return CustomTransform; }
 	FCustomSphereTransform& GetTransform() { return CustomTransform; }
 
-	const FCustomSphereRaycastCollider& GetCollider() const { return CustomSphereCollider; }
-	FCustomSphereRaycastCollider& GetCollider() { return CustomSphereCollider; }
+	const FCustomSphereCollider& GetCollider() const { return CustomSphereCollider; }
+	FCustomSphereCollider& GetCollider() { return CustomSphereCollider; }
 
 private:
 	UPROPERTY(EditAnywhere, Category = "Custom transform")
 	FCustomSphereTransform CustomTransform;
 
 	UPROPERTY(EditAnywhere, Category = "Custom colliders")
-	FCustomSphereRaycastCollider CustomSphereCollider;
+	FCustomSphereCollider CustomSphereCollider;
 
 	UPROPERTY()
 	FCustomShapeBuffers CustomShapeBuffers;

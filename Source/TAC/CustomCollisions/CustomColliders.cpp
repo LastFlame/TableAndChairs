@@ -1,20 +1,20 @@
-#include "CustomRaycastTypes.h"
+#include "CustomColliders.h"
 
-CustomRaycastCollidersArray::CustomRaycastCollidersArray(ICustomRaycastHittable& Owner) : Owner(Owner) {}
+CustomCollidersArray::CustomCollidersArray(ICustomHittable& Owner) : Owner(Owner) {}
 
-void CustomRaycastCollidersArray::Add(FCustomRaycastBaseCollider& Element)
+void CustomCollidersArray::Add(FCustomBaseCollider& Element)
 {
 	Element.HittableActor = Owner;
 	RaycastCollidersArray.Add(&Element);
 }
 
-void CustomRaycastCollidersArray::RemoveAt(int32_t Idx)
+void CustomCollidersArray::RemoveAt(int32_t Idx)
 {
-	RaycastCollidersArray[Idx]->HittableActor = TWeakInterfacePtr<ICustomRaycastHittable>();
+	RaycastCollidersArray[Idx]->HittableActor = TWeakInterfacePtr<ICustomHittable>();
 	RaycastCollidersArray.RemoveAt(Idx);
 }
 
-bool FCustomSphereRaycastCollider::HasBeenHit(const FVector& Origin, const FVector& Direction, FVector& OutHitPoint) const
+bool FCustomSphereCollider::HasBeenHit(const FVector& Origin, const FVector& Direction, FVector& OutHitPoint) const
 {
 	const float DirectionSize = Direction.Size();
 
@@ -44,7 +44,7 @@ bool FCustomSphereRaycastCollider::HasBeenHit(const FVector& Origin, const FVect
 }
 
 
-bool FCustomBoxRaycastCollider::HasBeenHit(const FVector& Origin, const FVector& Direction, FVector& OutHitPoint) const
+bool FCustomBoxCollider::HasBeenHit(const FVector& Origin, const FVector& Direction, FVector& OutHitPoint) const
 {
 	float TNear = -TNumericLimits<float>::Max();
 	float TFar = TNumericLimits<float>::Max();
@@ -97,7 +97,7 @@ bool FCustomBoxRaycastCollider::HasBeenHit(const FVector& Origin, const FVector&
 }
 
 
-bool FCustomPlaneRaycastCollider::HasBeenHit(const FVector& Origin, const FVector& Direction, FVector& OutHitPoint) const
+bool FCustomPlaneCollider::HasBeenHit(const FVector& Origin, const FVector& Direction, FVector& OutHitPoint) const
 {
 	constexpr float ParallelRayThreshold = 0.000015f;
 	constexpr float PointOnPlaneThreshold = 0.000015f;

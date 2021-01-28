@@ -2,8 +2,8 @@
 
 
 #include "CustomGameMode.h"
-#include "TAC/CustomLinecast/CustomRaycastSystemContainer.h"
-#include "TAC/CustomLinecast/CustomRaycastSystem.h"
+#include "TAC/CustomCollisions/CustomCollisionSystemContainer.h"
+#include "TAC/CustomCollisions/CustomLinecastSystem.h"
 
 ACustomGameMode::ACustomGameMode(const FObjectInitializer& ObjectInitializer)
 {
@@ -18,8 +18,8 @@ void ACustomGameMode::InitGame(const FString& MapName, const FString& Options, F
 {
 	Super::InitGame(MapName, Options, ErrorMessage);
 
-	CustomRaycastSystemContainer = NewObject<UCustomRaycastSystemContainer>();
+	CustomRaycastSystemContainer = NewObject<UCustomCollisionSystemContainer>();
 	CustomRaycastSystemContainer->Init(GetWorld());
-	CustomRaycastSystem::Init(CustomRaycastSystemContainer);
+	CustomLinecastSystem::Init(CustomRaycastSystemContainer);
 
 }

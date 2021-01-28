@@ -5,12 +5,12 @@
 #include "CoreMinimal.h"
 #include "UObject/WeakInterfacePtr.h"
 #include "UObject/NoExportTypes.h"
-#include "CustomRaycastTypes.h"
-#include "CustomRaycastSystemContainer.generated.h"
+#include "CustomColliders.h"
+#include "CustomCollisionSystemContainer.generated.h"
 
 
 UCLASS()
-class TAC_API UCustomRaycastSystemContainer : public UObject
+class TAC_API UCustomCollisionSystemContainer : public UObject
 {
 	GENERATED_BODY()
 	
@@ -18,7 +18,7 @@ public:
 	void Init(class UWorld* World);
 
 public:
-	const TArray<TWeakInterfacePtr<ICustomRaycastHittable>>& GetHittableActors() const { return HittableActors; }
+	const TArray<TWeakInterfacePtr<ICustomHittable>>& GetHittableActors() const { return HittableActors; }
 
 private:
 	UFUNCTION()
@@ -28,5 +28,5 @@ private:
 	void OnActorSpawned(AActor* SpawnedActor);
 
 private:
-	TArray<TWeakInterfacePtr<ICustomRaycastHittable>> HittableActors;
+	TArray<TWeakInterfacePtr<ICustomHittable>> HittableActors;
 };

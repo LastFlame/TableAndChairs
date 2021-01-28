@@ -1,30 +1,30 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "CustomRaycastSystem.h"
+#include "CustomLinecastSystem.h"
 
 
-namespace CustomRaycastSystem {
+namespace CustomLinecastSystem {
 
-	static TWeakObjectPtr<UCustomRaycastSystemContainer> RaycastSystemContainer;
+	static TWeakObjectPtr<UCustomCollisionSystemContainer> RaycastSystemContainer;
 
-	static TWeakInterfacePtr<ICustomRaycastHittable> PrevHitActor;
-	static FCustomRaycastBaseCollider* PrevHitCollider;
+	static TWeakInterfacePtr<ICustomHittable> PrevHitActor;
+	static FCustomBaseCollider* PrevHitCollider;
 
-	void Init(UCustomRaycastSystemContainer* CustomRaycastSystemContainer)
+	void Init(UCustomCollisionSystemContainer* CustomRaycastSystemContainer)
 	{
 		RaycastSystemContainer = CustomRaycastSystemContainer;
-		PrevHitActor = TWeakInterfacePtr<ICustomRaycastHittable>();
+		PrevHitActor = TWeakInterfacePtr<ICustomHittable>();
 		PrevHitCollider = nullptr;
 	}
 
-	bool Raycast(const FVector& Origin, const FVector& Direction, FCustomLinecastResult& OutLinecastResult)
+	bool Linecast(const FVector& Origin, const FVector& Direction, FCustomLinecastResult& OutLinecastResult)
 	{
 		OutLinecastResult.Reset();
 
 		float PrevHitPointDistance = TNumericLimits<float>::Max();
 
-		for (TWeakInterfacePtr<ICustomRaycastHittable> HittableActor : RaycastSystemContainer->GetHittableActors())
+		for (TWeakInterfacePtr<ICustomHittable> HittableActor : RaycastSystemContainer->GetHittableActors())
 		{
 			if (!HittableActor.IsValid())
 			{
@@ -52,13 +52,13 @@ namespace CustomRaycastSystem {
 
 			if (PrevHitActor.IsValid())
 			{
-				PrevHitActor->GetBoundCollider().OnHitChanged.Broadcast();
+				PrevHitActor->GetBoundCollider().OnCollisionExit.Broadcast();
 			}
 
-			OutLinecastResult.HitActor->GetBoundCollider().OnHit.Broadcast(OutLinecastResult.HitPoint);
+			OutLinecastResult.HitActor->GetBoundCollider().OnCollisionEnter.Broadcast(OutLinecastResult.HitPoint);
 			PrevHitActor = OutLinecastResult.HitActor;
 
-			for (FCustomRaycastBaseCollider* RaycastCollider : OutLinecastResult.HitActor->GetColliders().GetArray())
+			for (FCustomBaseCollider* RaycastCollider : OutLinecastResult.HitActor->GetColliders().GetArray())
 			{
 				FVector HitPoint;
 				if (RaycastCollider != nullptr && !RaycastCollider->HasBeenHit(Origin, Direction, HitPoint))
@@ -77,12 +77,12 @@ namespace CustomRaycastSystem {
 
 			if (PrevHitCollider != nullptr && PrevHitCollider->GetHittableActor().IsValid())
 			{
-				PrevHitCollider->OnHitChanged.Broadcast();
+				PrevHitCollider->OnCollisionExit.Broadcast();
 			}
 
 			if (OutLinecastResult.HitCollider != nullptr)
 			{
-				OutLinecastResult.HitCollider->OnHit.Broadcast(OutLinecastResult.HitPoint);
+				OutLinecastResult.HitCollider->OnCollisionEnter.Broadcast(OutLinecastResult.HitPoint);
 			}
 
 			PrevHitCollider = OutLinecastResult.HitCollider;
@@ -97,7 +97,7 @@ namespace CustomRaycastSystem {
 
 	void FCustomLinecastResult::Reset()
 	{
-		HitActor = TWeakInterfacePtr<ICustomRaycastHittable>();
+		HitActor = TWeakInterfacePtr<ICustomHittable>();
 		HitCollider = nullptr;
 		HitPoint = { 0.0f, 0.0f, 0.0f };
 	}

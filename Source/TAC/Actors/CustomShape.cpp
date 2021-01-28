@@ -43,13 +43,13 @@ ACustomShape::ACustomShape() : RaycastCollidersArray(*this)
 	RaycastCollidersArray.Add(TopLeftSphereComponent->GetCollider());
 	RaycastCollidersArray.Add(BottomLeftSphereComponent->GetCollider());
 
-	TableComponent->GetCollider().OnHit.AddUObject(this, &ACustomShape::OnBoundColliderHit);
-	TableComponent->GetCollider().OnHitChanged.AddUObject(this, &ACustomShape::OnBoundColliderHitChanged);
+	TableComponent->GetCollider().OnCollisionEnter.AddUObject(this, &ACustomShape::OnBoundColliderHit);
+	TableComponent->GetCollider().OnCollisionExit.AddUObject(this, &ACustomShape::OnBoundColliderHitChanged);
 
-	TopRightSphereComponent->GetCollider().OnHit.AddUObject(this, &ACustomShape::OnTopRightSphereHit);
-	BottomRightSphereComponent->GetCollider().OnHit.AddUObject(this, &ACustomShape::OnBottomRightSphereHit);
-	TopLeftSphereComponent->GetCollider().OnHit.AddUObject(this, &ACustomShape::OnTopLeftSphereHit);
-	BottomLeftSphereComponent->GetCollider().OnHit.AddUObject(this, &ACustomShape::OnBottomLeftSphereHit);
+	TopRightSphereComponent->GetCollider().OnCollisionEnter.AddUObject(this, &ACustomShape::OnTopRightSphereHit);
+	BottomRightSphereComponent->GetCollider().OnCollisionEnter.AddUObject(this, &ACustomShape::OnBottomRightSphereHit);
+	TopLeftSphereComponent->GetCollider().OnCollisionEnter.AddUObject(this, &ACustomShape::OnTopLeftSphereHit);
+	BottomLeftSphereComponent->GetCollider().OnCollisionEnter.AddUObject(this, &ACustomShape::OnBottomLeftSphereHit);
 }
 
 void ACustomShape::Generate()
@@ -73,14 +73,14 @@ void ACustomShape::Generate()
 	BottomLeftSphereComponent->GenerateCollider();
 }
 
-bool ACustomShape::Drag(const FCustomRaycastBaseCollider& Collider, const FVector& DragLocation)
+bool ACustomShape::Drag(const FCustomBaseCollider& Collider, const FVector& DragLocation)
 {
 	if (TableComponent->GetCustomShapeBuffer().VertexBuffer.Num() == 0)
 	{
 		return false;
 	}
 
-	FCustomSphereRaycastCollider* SphereCollider = (FCustomSphereRaycastCollider*)&Collider;
+	FCustomSphereCollider* SphereCollider = (FCustomSphereCollider*)&Collider;
 	if (SphereCollider == nullptr)
 	{
 		return false;

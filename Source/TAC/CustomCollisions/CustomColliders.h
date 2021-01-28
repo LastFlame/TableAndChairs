@@ -5,79 +5,79 @@
 #include "CoreMinimal.h"
 #include "UObject/Interface.h"
 #include "UObject/WeakInterfacePtr.h"
-#include "CustomRaycastTypes.generated.h"
+#include "CustomColliders.generated.h"
 
-DECLARE_MULTICAST_DELEGATE_OneParam(FCustomLinecastColliderHitSignature, const FVector&);
-DECLARE_MULTICAST_DELEGATE(FCustomLinecastColliderHitChangedSignature);
+DECLARE_MULTICAST_DELEGATE_OneParam(FCustomOnCollisionEnterSignature, const FVector&);
+DECLARE_MULTICAST_DELEGATE(FCustomOnCollisionExitSignature);
 
 
-class CustomRaycastCollidersArray
+class CustomCollidersArray
 {
 public:
-	CustomRaycastCollidersArray() {};
-	CustomRaycastCollidersArray(class ICustomRaycastHittable& Owner);
+	CustomCollidersArray() {};
+	CustomCollidersArray(class ICustomHittable& Owner);
 
 public:
-	void Add(struct FCustomRaycastBaseCollider& Element);
+	void Add(struct FCustomBaseCollider& Element);
 	void RemoveAt(int32_t Idx);
 
 public:
-	const TArray<struct FCustomRaycastBaseCollider*>& GetArray() const { return RaycastCollidersArray; }
+	const TArray<struct FCustomBaseCollider*>& GetArray() const { return RaycastCollidersArray; }
 
 protected:
-	TWeakInterfacePtr<class ICustomRaycastHittable> Owner;
-	TArray<struct FCustomRaycastBaseCollider*> RaycastCollidersArray;
+	TWeakInterfacePtr<class ICustomHittable> Owner;
+	TArray<struct FCustomBaseCollider*> RaycastCollidersArray;
 };
 
 UINTERFACE(MinimalAPI)
-class UCustomRaycastHittable : public UInterface
+class UCustomHittable : public UInterface
 {
 	GENERATED_BODY()
 };
 
-class TAC_API ICustomRaycastHittable
+class TAC_API ICustomHittable
 {
 	GENERATED_BODY()
 
 public:
-	virtual const FCustomRaycastBaseCollider& GetBoundCollider() const = 0;
-	virtual const class CustomRaycastCollidersArray& GetColliders() const = 0;
+	virtual const FCustomBaseCollider& GetBoundCollider() const = 0;
+	virtual const class CustomCollidersArray& GetColliders() const = 0;
 };
 
 USTRUCT()
-struct TAC_API FCustomRaycastBaseCollider
+struct TAC_API FCustomBaseCollider
 {
 	GENERATED_USTRUCT_BODY()
 
-	FCustomRaycastBaseCollider() {}
-	virtual ~FCustomRaycastBaseCollider() { }
+	FCustomBaseCollider() {}
+	virtual ~FCustomBaseCollider() { }
 
 public:
 	virtual bool HasBeenHit(const FVector& Origin, const FVector& Direction, FVector& OutHitPoint) const { return false; }
 
 public:
-	FCustomLinecastColliderHitSignature OnHit;	
-	FCustomLinecastColliderHitChangedSignature OnHitChanged;
+	FCustomOnCollisionEnterSignature OnCollisionEnter;	
+	FCustomOnCollisionExitSignature OnCollisionExit;
 
 	const FVector& GetLocation() const { return Location; }
 	void SetLocation(const FVector& NewLocation) { Location = NewLocation; }
 
-	const TWeakInterfacePtr<ICustomRaycastHittable> GetHittableActor() const { return HittableActor; }
-	TWeakInterfacePtr<ICustomRaycastHittable> GetHittableActor() { return HittableActor; }
+	const TWeakInterfacePtr<ICustomHittable> GetHittableActor() const { return HittableActor; }
+	TWeakInterfacePtr<ICustomHittable> GetHittableActor() { return HittableActor; }
 
-	void SetHittableActor(ICustomRaycastHittable& NewHittableActor) { HittableActor = NewHittableActor; }
+	void SetHittableActor(ICustomHittable& NewHittableActor) { HittableActor = NewHittableActor; }
 
 protected:
 	UPROPERTY(EditAnywhere)
 	FVector Location;
 
-	TWeakInterfacePtr<ICustomRaycastHittable> HittableActor;
+	TWeakInterfacePtr<ICustomHittable> HittableActor;
 
-	friend class CustomRaycastCollidersArray;
+	friend class CustomCollidersArray;
 };
 
 USTRUCT()
-struct FCustomSphereRaycastCollider : public FCustomRaycastBaseCollider
+struct FCustomSphereCollider : public FCustomBaseCollider
 {
 	GENERATED_USTRUCT_BODY()
 
@@ -92,7 +92,7 @@ protected:
 };
 
 USTRUCT()
-struct FCustomBoxRaycastCollider : public FCustomRaycastBaseCollider
+struct FCustomBoxCollider : public FCustomBaseCollider
 {
 	GENERATED_USTRUCT_BODY()
 
@@ -113,7 +113,7 @@ protected:
 };
 
 USTRUCT()
-struct FCustomPlaneRaycastCollider : public FCustomRaycastBaseCollider
+struct FCustomPlaneCollider : public FCustomBaseCollider
 {
 	GENERATED_USTRUCT_BODY()
 

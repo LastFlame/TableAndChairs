@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "TAC/CustomLinecast/CustomRaycastTypes.h"
+#include "TAC/CustomCollisions/CustomColliders.h"
 #include "TAC/CustomShapes/CustomShapesTypes.h"
 #include "CustomQuadComponent.generated.h"
 
@@ -27,15 +27,15 @@ public:
 	const FCustomQuadTransform& GetTransform() const { return CustomTransform; }
 	FCustomQuadTransform& GetTransform() { return CustomTransform; }
 
-	const FCustomBoxRaycastCollider& GetCollider() const { return CustomBoxCollider; }
-	FCustomBoxRaycastCollider& GetCollider() { return CustomBoxCollider; }
+	const FCustomBoxCollider& GetCollider() const { return CustomBoxCollider; }
+	FCustomBoxCollider& GetCollider() { return CustomBoxCollider; }
 
 private:
 	UPROPERTY(EditAnywhere, Category = "Custom transform")
 	FCustomQuadTransform CustomTransform;
 
 	UPROPERTY(EditAnywhere, Category = "Custom colliders")
-	FCustomBoxRaycastCollider CustomBoxCollider;
+	FCustomBoxCollider CustomBoxCollider;
 
 	UPROPERTY()
 	FCustomShapeBuffers CustomShapeBuffers;

@@ -6,11 +6,11 @@
 #include "CustomGround.h"
 #include "CustomShape.h"
 #include "DrawDebugHelpers.h"
-#include "TAC/CustomLinecast/CustomRaycastSystem.h"
+#include "TAC/CustomCollisions/CustomLinecastSystem.h"
 #include "GameFramework/FloatingPawnMovement.h"
 
 static TWeakObjectPtr<ACustomShape> DraggableActor;
-static FCustomRaycastBaseCollider* DraggableCollider = nullptr;
+static FCustomBaseCollider* DraggableCollider = nullptr;
 
 static float X, Y;
 static float SavedMouseX, SavedMouseY;
@@ -68,14 +68,14 @@ void ACustomPawn::ShootRaycast()
 	FVector WorldLocation, WorldDirection;
 	PlayerController->DeprojectMousePositionToWorld(WorldLocation, WorldDirection);
 
-	CustomRaycastSystem::FCustomLinecastResult LinecastResult;
+	CustomLinecastSystem::FCustomLinecastResult LinecastResult;
 
 	DrawDebugLine(GetWorld(), GetActorLocation(), GetActorLocation() + WorldDirection * 10000.0f, FColor::Green, false, 10.0f);
 
 	DraggableActor.Reset();
 	DraggableCollider = nullptr;
 
-	if (CustomRaycastSystem::Raycast(WorldLocation, WorldDirection, LinecastResult))
+	if (CustomLinecastSystem::Linecast(WorldLocation, WorldDirection, LinecastResult))
 	{
 		UObject* HitObject = LinecastResult.GetHitActor().GetObject();
 		UE_LOG(LogTemp, Warning, TEXT("HitActor = {%s}. Location = {%s}."), *HitObject->GetName(), *LinecastResult.GetHitPoint().ToString());

@@ -6,7 +6,7 @@
 #include "GameFramework/GameModeBase.h"
 #include "CustomGameMode.generated.h"
 
-class UCustomRaycastSystemContainer;
+class UCustomCollisionSystemContainer;
 
 UCLASS()
 class TAC_API ACustomGameMode : public AGameModeBase
@@ -19,5 +19,5 @@ public:
 
 private:
 	UPROPERTY();
-	UCustomRaycastSystemContainer* CustomRaycastSystemContainer;
+	UCustomCollisionSystemContainer* CustomRaycastSystemContainer;
 };
