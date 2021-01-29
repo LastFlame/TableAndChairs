@@ -7,9 +7,8 @@
 #include "UObject/WeakInterfacePtr.h"
 #include "CustomColliders.generated.h"
 
-DECLARE_MULTICAST_DELEGATE_OneParam(FCustomOnCollisionEnterSignature, const FVector&);
-DECLARE_MULTICAST_DELEGATE(FCustomOnCollisionExitSignature);
-
+DECLARE_MULTICAST_DELEGATE_OneParam(FCustomOnLineTraceHitSignature, const FVector&);
+DECLARE_MULTICAST_DELEGATE(FCustomOnLineTraceHitChangedSignature);
 
 class CustomCollidersArray
 {
@@ -49,15 +48,17 @@ struct TAC_API FCustomBaseCollider
 {
 	GENERATED_USTRUCT_BODY()
 
+public:
 	FCustomBaseCollider() {}
 	virtual ~FCustomBaseCollider() { }
 
 public:
 	virtual bool HasBeenHit(const FVector& Origin, const FVector& Direction, FVector& OutHitPoint) const { return false; }
+	virtual bool HasBeenHit(const struct FCustomBoxCollider& Box) const { return false; }
 
 public:
-	FCustomOnCollisionEnterSignature OnCollisionEnter;	
-	FCustomOnCollisionExitSignature OnCollisionExit;
+	FCustomOnLineTraceHitSignature OnLineTraceHit;
+	FCustomOnLineTraceHitChangedSignature OnLineTraceHitChanged;
 
 	const FVector& GetLocation() const { return Location; }
 	void SetLocation(const FVector& NewLocation) { Location = NewLocation; }
@@ -97,6 +98,7 @@ struct FCustomBoxCollider : public FCustomBaseCollider
 	GENERATED_USTRUCT_BODY()
 
 	virtual bool HasBeenHit(const FVector& Origin, const FVector& Direction, FVector& OutHitPoint) const override;
+	virtual bool HasBeenHit(const FCustomBoxCollider& Box) const override;
 
 	const FVector& GetMinBounds() const { return MinBounds; }
 	void SetMinBounds(const FVector& NewMinBounds) { MinBounds = NewMinBounds; }

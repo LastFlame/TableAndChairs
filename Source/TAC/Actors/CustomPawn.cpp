@@ -6,7 +6,7 @@
 #include "CustomGround.h"
 #include "CustomShape.h"
 #include "DrawDebugHelpers.h"
-#include "TAC/CustomCollisions/CustomLinecastSystem.h"
+#include "TAC/CustomCollisions/CustomCollisionSystem.h"
 #include "GameFramework/FloatingPawnMovement.h"
 
 static TWeakObjectPtr<ACustomShape> DraggableActor;
@@ -68,14 +68,14 @@ void ACustomPawn::ShootRaycast()
 	FVector WorldLocation, WorldDirection;
 	PlayerController->DeprojectMousePositionToWorld(WorldLocation, WorldDirection);
 
-	CustomLinecastSystem::FCustomLinecastResult LinecastResult;
+	CustomCollisionSystem::FCustomCollisionResult LinecastResult;
 
 	DrawDebugLine(GetWorld(), GetActorLocation(), GetActorLocation() + WorldDirection * 10000.0f, FColor::Green, false, 10.0f);
 
 	DraggableActor.Reset();
 	DraggableCollider = nullptr;
 
-	if (CustomLinecastSystem::Linecast(WorldLocation, WorldDirection, LinecastResult))
+	if (CustomCollisionSystem::LineTrace(WorldLocation, WorldDirection, LinecastResult))
 	{
 		UObject* HitObject = LinecastResult.GetHitActor().GetObject();
 		UE_LOG(LogTemp, Warning, TEXT("HitActor = {%s}. Location = {%s}."), *HitObject->GetName(), *LinecastResult.GetHitPoint().ToString());

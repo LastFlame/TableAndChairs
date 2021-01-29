@@ -43,13 +43,13 @@ ACustomShape::ACustomShape() : RaycastCollidersArray(*this)
 	RaycastCollidersArray.Add(TopLeftSphereComponent->GetCollider());
 	RaycastCollidersArray.Add(BottomLeftSphereComponent->GetCollider());
 
-	TableComponent->GetCollider().OnCollisionEnter.AddUObject(this, &ACustomShape::OnBoundColliderHit);
-	TableComponent->GetCollider().OnCollisionExit.AddUObject(this, &ACustomShape::OnBoundColliderHitChanged);
+	TableComponent->GetCollider().OnLineTraceHit.AddUObject(this, &ACustomShape::OnBoundColliderHit);
+	TableComponent->GetCollider().OnLineTraceHitChanged.AddUObject(this, &ACustomShape::OnBoundColliderHitChanged);
 
-	TopRightSphereComponent->GetCollider().OnCollisionEnter.AddUObject(this, &ACustomShape::OnTopRightSphereHit);
-	BottomRightSphereComponent->GetCollider().OnCollisionEnter.AddUObject(this, &ACustomShape::OnBottomRightSphereHit);
-	TopLeftSphereComponent->GetCollider().OnCollisionEnter.AddUObject(this, &ACustomShape::OnTopLeftSphereHit);
-	BottomLeftSphereComponent->GetCollider().OnCollisionEnter.AddUObject(this, &ACustomShape::OnBottomLeftSphereHit);
+	TopRightSphereComponent->GetCollider().OnLineTraceHit.AddUObject(this, &ACustomShape::OnTopRightSphereHit);
+	BottomRightSphereComponent->GetCollider().OnLineTraceHit.AddUObject(this, &ACustomShape::OnBottomRightSphereHit);
+	TopLeftSphereComponent->GetCollider().OnLineTraceHit.AddUObject(this, &ACustomShape::OnTopLeftSphereHit);
+	BottomLeftSphereComponent->GetCollider().OnLineTraceHit.AddUObject(this, &ACustomShape::OnBottomLeftSphereHit);
 }
 
 void ACustomShape::Generate()

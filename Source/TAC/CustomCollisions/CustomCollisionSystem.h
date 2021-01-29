@@ -5,16 +5,20 @@
 #include "CoreMinimal.h"
 #include "CustomCollisionSystemContainer.h"
 
-namespace CustomLinecastSystem {
+namespace CustomCollisionSystem {
 
 	void Init(class UCustomCollisionSystemContainer* CustomRaycastSystemContainer);
 
-	bool Linecast(const FVector& Origin, const FVector& Direction, struct FCustomLinecastResult& OutLinecastResult);
+	bool LineTrace(const FVector& Origin, const FVector& Direction, struct FCustomCollisionResult& OutCollisionResult);
 
-	struct FCustomLinecastResult
+	bool BoxTrace(const FCustomBoxCollider& Box, struct FCustomCollisionResult& OutCollisionResult);
+
+	struct FCustomCollisionResult
 	{
 	public:
-		FCustomLinecastResult();
+		FCustomCollisionResult();
+
+	public:
 		void Reset();
 
 	public:
@@ -27,6 +31,7 @@ namespace CustomLinecastSystem {
 		FCustomBaseCollider* HitCollider;
 		FVector HitPoint;
 
-		friend bool Linecast(const FVector& Origin, const FVector& Direction, FCustomLinecastResult& OutLinecastResult);
+		friend bool LineTrace(const FVector& Origin, const FVector& Direction, FCustomCollisionResult& OutCollisionResult);
+		friend bool BoxTrace(const FCustomBoxCollider& Box, FCustomCollisionResult& OutCollisionResult);
 	};
 }

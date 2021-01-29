@@ -97,6 +97,19 @@ bool FCustomBoxCollider::HasBeenHit(const FVector& Origin, const FVector& Direct
 }
 
 
+bool FCustomBoxCollider::HasBeenHit(const FCustomBoxCollider& Box) const
+{
+	for (int i = 0; i < 3; ++i)
+	{
+		if (MinBounds[i] > Box.MaxBounds[i] || Box.MinBounds[i] > MaxBounds[i])
+		{
+			return false;
+		}
+	}
+
+	return true;
+}
+
 bool FCustomPlaneCollider::HasBeenHit(const FVector& Origin, const FVector& Direction, FVector& OutHitPoint) const
 {
 	constexpr float ParallelRayThreshold = 0.000015f;
