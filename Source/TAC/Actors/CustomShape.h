@@ -11,6 +11,7 @@
 
 class USceneComponent;
 class UCustomSphereComponent;
+class UCustomShapeTemplateDataAsset;
 
 UCLASS()
 class TAC_API ACustomShape : public AActor, public ICustomHittable
@@ -21,6 +22,8 @@ public:
 	ACustomShape();
 
 public:
+	static void Create(UWorld* World, const FVector& Location);
+
 	UFUNCTION(CallInEditor, Category = "Debug")
 	void Generate();
 
@@ -79,17 +82,20 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Components")
 	UCustomSphereComponent* BottomLeftSphereComponent;
 
-	UPROPERTY(EditAnywhere, Category = "Mesh values")
-	float SphereRadius = 8.0f;
+	UPROPERTY(VisibleAnywhere, Category = "Mesh values")
+	float SphereRadius;
 
-	UPROPERTY(EditAnywhere, Category = "Mesh values")
+	UPROPERTY(VisibleAnywhere, Category = "Mesh values")
+	float DragThreshold;
+
+	UPROPERTY(VisibleAnywhere, Category = "Mesh values")
 	UMaterialInterface* OnSphereSelectedMat;
 
-	UPROPERTY(EditAnywhere, Category = "Mesh values")
+	UPROPERTY(VisibleAnywhere, Category = "Mesh values")
 	UMaterialInterface* OnSelectedTableMat;
 
-	UPROPERTY(EditAnywhere, Category = "Mesh values")
-	float DragThreshold = 5.0f;
+	UPROPERTY()
+	UCustomShapeTemplateDataAsset* CustomShapeTemplateData;
 
 	UPROPERTY()
 	UCustomSphereComponent* PrevHitSphere;

@@ -31,7 +31,7 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Custom transform")
 	FCustomSphereTransform CustomTransform;
 
-	UPROPERTY(EditAnywhere, Category = "Custom colliders")
+	UPROPERTY(VisibleAnywhere, Category = "Custom colliders")
 	FCustomSphereCollider CustomSphereCollider;
 
 	UPROPERTY()

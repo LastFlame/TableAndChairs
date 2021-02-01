@@ -10,6 +10,17 @@
 DECLARE_MULTICAST_DELEGATE_OneParam(FCustomOnLineTraceHitSignature, const FVector&);
 DECLARE_MULTICAST_DELEGATE(FCustomOnLineTraceHitChangedSignature);
 
+UENUM(Meta = (Bitflags))
+enum class ECustomCollisionFlags
+{
+	Ignore,
+	Static,
+	Dynamic
+};
+
+#define ENUM_TO_BIT(Enum) (1 << static_cast<uint8>(Enum))
+#define COMPARE_ENUMS(EnumA, EnumB) ( (ENUM_TO_BIT(EnumA) & ENUM_TO_BIT(EnumB)) > 0) 
+
 class CustomCollidersArray
 {
 public:
@@ -63,14 +74,20 @@ public:
 	const FVector& GetLocation() const { return Location; }
 	void SetLocation(const FVector& NewLocation) { Location = NewLocation; }
 
+	ECustomCollisionFlags GetFlag() const { return CollisionFlag; }
+	ECustomCollisionFlags GetFlag() { return CollisionFlag; }
+	void SetFlag(ECustomCollisionFlags NewFlag) { CollisionFlag = NewFlag; }
+
 	const TWeakInterfacePtr<ICustomHittable> GetHittableActor() const { return HittableActor; }
 	TWeakInterfacePtr<ICustomHittable> GetHittableActor() { return HittableActor; }
-
 	void SetHittableActor(ICustomHittable& NewHittableActor) { HittableActor = NewHittableActor; }
 
 protected:
 	UPROPERTY(EditAnywhere)
 	FVector Location;
+
+	UPROPERTY(EditAnywhere)
+	ECustomCollisionFlags CollisionFlag;
 
 	TWeakInterfacePtr<ICustomHittable> HittableActor;
 

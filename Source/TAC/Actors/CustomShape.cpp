@@ -5,6 +5,7 @@
 #include "TAC/CustomShapes/Components/CustomSphereComponent.h"
 #include "DrawDebugHelpers.h"
 #include "TAC/CustomShapes/CustomShapesRenderer.h"
+#include "TAC/CustomShapeTemplateDataAsset.h"
 
 ACustomShape::ACustomShape() : RaycastCollidersArray(*this)
 {
@@ -13,18 +14,31 @@ ACustomShape::ACustomShape() : RaycastCollidersArray(*this)
 	
 	TableComponent = CreateDefaultSubobject<UCustomTableComponent>(TEXT("TableComponent"));
 	TableComponent->SetupAttachment(RootComponent);
+	TableComponent->GetCollider().SetFlag(ECustomCollisionFlags::Dynamic);
 
 	TopRightSphereComponent = CreateDefaultSubobject<UCustomSphereComponent>(TEXT("TopRightSphereComponent"));
 	TopRightSphereComponent->SetupAttachment(RootComponent);
+	TopRightSphereComponent->GetCollider().SetFlag(ECustomCollisionFlags::Dynamic);
 
 	BottomRightSphereComponent = CreateDefaultSubobject<UCustomSphereComponent>(TEXT("BottomRightSphereComponent"));
 	BottomRightSphereComponent->SetupAttachment(RootComponent);
+	BottomRightSphereComponent->GetCollider().SetFlag(ECustomCollisionFlags::Dynamic);
 
 	TopLeftSphereComponent = CreateDefaultSubobject<UCustomSphereComponent>(TEXT("TopLeftSphereComponent"));
 	TopLeftSphereComponent->SetupAttachment(RootComponent);
+	TopLeftSphereComponent->GetCollider().SetFlag(ECustomCollisionFlags::Dynamic);
 
 	BottomLeftSphereComponent = CreateDefaultSubobject<UCustomSphereComponent>(TEXT("BottomLeftSphereComponent"));
 	BottomLeftSphereComponent->SetupAttachment(RootComponent);
+	BottomLeftSphereComponent->GetCollider().SetFlag(ECustomCollisionFlags::Dynamic);
+
+	static ConstructorHelpers::FObjectFinder<UCustomShapeTemplateDataAsset> CustomShapeDataAsset(TEXT("CustomShapeTemplateDataAsset'/Game/TAC/CustomShapeTemplateDataAsset.CustomShapeTemplateDataAsset'"));
+	if (CustomShapeDataAsset.Object != NULL)
+	{
+		CustomShapeTemplateData = CustomShapeDataAsset.Object;
+		SphereRadius = CustomShapeTemplateData->GetSphereRadius();
+		DragThreshold = CustomShapeTemplateData->GetDragThreashold();
+	}
 
 	static ConstructorHelpers::FObjectFinder<UMaterial> SphereMaterial(TEXT("Material'/Game/StarterContent/Materials/M_Metal_Gold.M_Metal_Gold'"));
 	if (SphereMaterial.Object != NULL)
@@ -50,6 +64,14 @@ ACustomShape::ACustomShape() : RaycastCollidersArray(*this)
 	BottomRightSphereComponent->GetCollider().OnLineTraceHit.AddUObject(this, &ACustomShape::OnBottomRightSphereHit);
 	TopLeftSphereComponent->GetCollider().OnLineTraceHit.AddUObject(this, &ACustomShape::OnTopLeftSphereHit);
 	BottomLeftSphereComponent->GetCollider().OnLineTraceHit.AddUObject(this, &ACustomShape::OnBottomLeftSphereHit);
+}
+
+
+void ACustomShape::Create(UWorld* World, const FVector& Location)
+{
+	ACustomShape* CustomShape = World->SpawnActor<ACustomShape>(FVector::ZeroVector, FRotator::ZeroRotator);
+	CustomShape->SetCustomLocation(Location.X, Location.Y);
+	CustomShape->Generate();
 }
 
 void ACustomShape::Generate()

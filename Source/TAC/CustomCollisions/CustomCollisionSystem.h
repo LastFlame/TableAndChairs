@@ -11,7 +11,7 @@ namespace CustomCollisionSystem {
 
 	bool LineTrace(const FVector& Origin, const FVector& Direction, struct FCustomCollisionResult& OutCollisionResult);
 
-	bool BoxTrace(const FCustomBoxCollider& Box, struct FCustomCollisionResult& OutCollisionResult);
+	bool BoxTrace(const FCustomBoxCollider& Box, ECustomCollisionFlags CollidersToSkip, struct FCustomCollisionResult& OutCollisionResult);
 
 	struct FCustomCollisionResult
 	{
@@ -32,6 +32,6 @@ namespace CustomCollisionSystem {
 		FVector HitPoint;
 
 		friend bool LineTrace(const FVector& Origin, const FVector& Direction, FCustomCollisionResult& OutCollisionResult);
-		friend bool BoxTrace(const FCustomBoxCollider& Box, FCustomCollisionResult& OutCollisionResult);
+		friend bool BoxTrace(const FCustomBoxCollider& Box, ECustomCollisionFlags CollidersToSkip, FCustomCollisionResult& OutCollisionResult);
 	};
 }

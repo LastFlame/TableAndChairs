@@ -7,6 +7,8 @@
 #include "TAC/CustomShapes/CustomShapesTypes.h"
 #include "CustomTableComponent.generated.h"
 
+class UCustomShapeTemplateDataAsset;
+
 UCLASS(hideCategories = "ProceduralMesh")
 class TAC_API UCustomTableComponent : public UProceduralMeshComponent
 {
@@ -52,32 +54,38 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Custom transform")
 	FCustomCubeTransform CustomTransform;
 
-	UPROPERTY(EditAnywhere, Category = "Custom colliders")
+	UPROPERTY(VisibleAnywhere, Category = "Custom colliders")
 	FCustomBoxCollider CustomBoxCollider;
 
-	UPROPERTY(EditAnywhere, Category = "Table values")
+	UPROPERTY(VisibleAnywhere, Category = "Custom colliders")
+	float ColliderMaxBoundOffset;
+
+	UPROPERTY(VisibleAnywhere, Category = "Table values")
 	FVector2D TableLegsSize;
 
-	UPROPERTY(EditAnywhere, Category = "Table values")
+	UPROPERTY(VisibleAnywhere, Category = "Table values")
 	FVector2D TableMinSize;
 
-	UPROPERTY(EditAnywhere, Category = "Chairs values")
+	UPROPERTY(VisibleAnywhere, Category = "Chairs values")
 	float DistanceBetweenChairs;
 
-	UPROPERTY(EditAnywhere, Category = "Chairs values")
+	UPROPERTY(VisibleAnywhere, Category = "Chairs values")
 	float ChairDistanceFromTableSide;
 
-	UPROPERTY(EditAnywhere, Category = "Chairs values")
+	UPROPERTY(VisibleAnywhere, Category = "Chairs values")
 	float ChairDistanceFromTableBottom;
 
-	UPROPERTY(EditAnywhere, Category = "Chairs values")
+	UPROPERTY(VisibleAnywhere, Category = "Chairs values")
 	FVector ChairSize;
 
-	UPROPERTY(EditAnywhere, Category = "Chairs values")
+	UPROPERTY(VisibleAnywhere, Category = "Chairs values")
 	FVector2D ChairLegsSize;
 
-	UPROPERTY(EditAnywhere, Category = "Chairs values")
+	UPROPERTY(VisibleAnywhere, Category = "Chairs values")
 	FVector ChairBackRestSize;
+
+	UPROPERTY()
+	UCustomShapeTemplateDataAsset* CustomShapeTemplateData;
 
 	UPROPERTY()
 	FCustomShapeBuffers CustomShapeBuffers;

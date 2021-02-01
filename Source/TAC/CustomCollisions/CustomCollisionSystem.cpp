@@ -93,7 +93,7 @@ namespace CustomCollisionSystem {
 		return bHitActorIsValid;
 	}
 
-	bool BoxTrace(const FCustomBoxCollider& Box, FCustomCollisionResult& OutCollisionResult)
+	bool BoxTrace(const FCustomBoxCollider& Box, ECustomCollisionFlags CollidersToSkip, FCustomCollisionResult& OutCollisionResult)
 	{
 		OutCollisionResult.Reset();
 
@@ -102,6 +102,11 @@ namespace CustomCollisionSystem {
 		for (TWeakInterfacePtr<ICustomHittable> HittableActor : RaycastSystemContainer->GetHittableActors())
 		{
 			if (!HittableActor.IsValid())
+			{
+				continue;
+			}
+
+			if (COMPARE_ENUMS(CollidersToSkip, HittableActor->GetBoundCollider().GetFlag()))
 			{
 				continue;
 			}
@@ -127,7 +132,17 @@ namespace CustomCollisionSystem {
 
 			for (FCustomBaseCollider* Collider : OutCollisionResult.HitActor->GetColliders().GetArray())
 			{
-				if (Collider != nullptr && !Collider->HasBeenHit(Box))
+				if (Collider != nullptr)
+				{
+					continue;
+				}
+
+				if (COMPARE_ENUMS(CollidersToSkip, Collider->GetFlag()))
+				{
+					continue;
+				}
+
+				if (!Collider->HasBeenHit(Box))
 				{
 					continue;
 				}

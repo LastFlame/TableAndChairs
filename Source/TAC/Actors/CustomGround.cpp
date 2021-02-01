@@ -10,6 +10,7 @@ ACustomGround::ACustomGround() : RaycastCollidersArray(*this)
 
 	QuadComponent = CreateDefaultSubobject<UCustomQuadComponent>(TEXT("Plane"));
 	QuadComponent->SetupAttachment(RootComponent);
+	QuadComponent->GetCollider().SetFlag(ECustomCollisionFlags::Static);
 }
 
 void ACustomGround::Generate()

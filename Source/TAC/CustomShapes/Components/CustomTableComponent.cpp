@@ -4,12 +4,27 @@
 #include "CustomTableComponent.h"
 #include "TAC/CustomShapes/CustomShapesRenderer.h"
 #include "GenericPlatform/GenericPlatformMath.h"
+#include "TAC/CustomShapeTemplateDataAsset.h"
 
-UCustomTableComponent::UCustomTableComponent(const FObjectInitializer& ObjectInitializer) : UProceduralMeshComponent(ObjectInitializer),
-	CustomTransform({ 0.0f, 0.0f, 73.0f }, { 0.0f, 0.0f, 0.0f }, { 32.0f, 32.0f, 1.5f }), TableLegsSize(2.0f, 2.0f), 
-	TableMinSize(CustomTransform.Size.X, CustomTransform.Size.Y), DistanceBetweenChairs(10.0f), ChairDistanceFromTableSide(30.0f), 
-	ChairDistanceFromTableBottom(30.0f), ChairSize(20.0f, 18.0f, 1.0f), ChairLegsSize(1.0f, 1.0f), ChairBackRestSize(1.0f, 0.0f, 18.0f)
+
+UCustomTableComponent::UCustomTableComponent(const FObjectInitializer& ObjectInitializer) : UProceduralMeshComponent(ObjectInitializer)
 {
+	static ConstructorHelpers::FObjectFinder<UCustomShapeTemplateDataAsset> CustomShapeDataAsset(TEXT("CustomShapeTemplateDataAsset'/Game/TAC/CustomShapeTemplateDataAsset.CustomShapeTemplateDataAsset'"));
+	if (CustomShapeDataAsset.Object != NULL)
+	{
+		CustomShapeTemplateData = CustomShapeDataAsset.Object;
+		CustomTransform = CustomShapeTemplateData->GetCustomTransform();
+		ColliderMaxBoundOffset = CustomShapeTemplateData->GetColliderMaxBoundOffset();
+		TableLegsSize = CustomShapeTemplateData->GetTableLegsSize();
+		TableMinSize = CustomShapeTemplateData->GetTableMinSize();
+		DistanceBetweenChairs = CustomShapeTemplateData->GetDistanceBetweenCharis();
+		ChairDistanceFromTableSide = CustomShapeTemplateData->GetChairDistanceFromTableSide();
+		ChairDistanceFromTableBottom = CustomShapeTemplateData->GetChairDistanceFromTableBottom();
+		ChairSize = CustomShapeTemplateData->GetChairSize();
+		ChairLegsSize = CustomShapeTemplateData->GetChairLegsSize();
+		ChairBackRestSize = CustomShapeTemplateData->GetChairBackRestSize();
+	}
+	
 	// Preallocate some custom shape buffer memory.
 	constexpr int32 ReserveSize = 2000;
 	CustomShapeBuffers.VertexBuffer.Reserve(ReserveSize);
@@ -76,7 +91,7 @@ void UCustomTableComponent::GenerateCollider()
 	const float DistanceFromMidToFrontBackRestChair = CustomTransform.Size.X + ChairDistanceFromTableSide + ChairSize.X + ChairBackRestSize.X;
 	const float DistanceFromtMidToRightBackRestChair = CustomTransform.Size.Y + ChairDistanceFromTableSide + ChairSize.Y + ChairBackRestSize.Y;
 	const FVector MinStartLocation = CustomTransform.Location - TableTopNormal * (CustomTransform.Location.Z) ; 
-	const FVector MaxStartLocation = CustomTransform.Location + TableTopNormal * 20.f;
+	const FVector MaxStartLocation = CustomTransform.Location + TableTopNormal * ColliderMaxBoundOffset;
 
 	// Location: top left looking at the table after the chairs.
 	CustomBoxCollider.SetMaxBounds((MaxStartLocation + TableFrontNormal * DistanceFromMidToFrontBackRestChair)

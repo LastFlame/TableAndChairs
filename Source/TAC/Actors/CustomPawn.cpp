@@ -8,6 +8,8 @@
 #include "DrawDebugHelpers.h"
 #include "TAC/CustomCollisions/CustomCollisionSystem.h"
 #include "GameFramework/FloatingPawnMovement.h"
+#include "TAC/CustomShapeTemplateDataAsset.h"
+#include "TAC/CustomGameMode.h"
 
 static TWeakObjectPtr<ACustomShape> DraggableActor;
 static FCustomBaseCollider* DraggableCollider = nullptr;
@@ -94,9 +96,49 @@ void ACustomPawn::ShootRaycast()
 		}
 		else if (HitObject->IsA(ACustomGround::StaticClass()))
 		{
-			ACustomShape* CustomShape = GetWorld()->SpawnActor<ACustomShape>(FVector::ZeroVector, FRotator::ZeroRotator);
-			CustomShape->SetCustomLocation(LinecastResult.GetHitPoint().X, LinecastResult.GetHitPoint().Y);
-			CustomShape->Generate();
+			const ACustomGameMode* CustomGameMode = Cast<const ACustomGameMode>(GetWorld()->GetAuthGameMode());
+			if (CustomGameMode == nullptr)
+			{
+				return;
+			}
+
+			const UCustomShapeTemplateDataAsset& CustomShapeTemplateData = CustomGameMode->GetCustomShapeTemplateData();
+
+			const float DistanceFromMidToFrontBackRestChair = CustomShapeTemplateData.GetCustomTransform().Size.X + CustomShapeTemplateData.GetChairDistanceFromTableSide() 
+				+ CustomShapeTemplateData.GetChairSize().X + CustomShapeTemplateData.GetChairBackRestSize().X;
+			
+			const float DistanceFromtMidToRightBackRestChair = CustomShapeTemplateData.GetCustomTransform().Size.Y + CustomShapeTemplateData.GetChairDistanceFromTableSide()
+				+ CustomShapeTemplateData.GetChairSize().Y + CustomShapeTemplateData.GetChairBackRestSize().Y;
+
+			const FVector MinStartLocation = (CustomShapeTemplateData.GetCustomTransform().Location + LinecastResult.GetHitPoint()) 
+				- FVector::UpVector * (CustomShapeTemplateData.GetCustomTransform().Location.Z);
+
+			const FVector MaxStartLocation = (CustomShapeTemplateData.GetCustomTransform().Location + LinecastResult.GetHitPoint()) 
+				+ FVector::UpVector * CustomShapeTemplateData.GetColliderMaxBoundOffset();
+
+			FCustomBoxCollider TableToSpawnCollider;
+
+			// Location: top left looking at the table after the chairs.
+			TableToSpawnCollider.SetMaxBounds((MaxStartLocation + FVector::ForwardVector * DistanceFromMidToFrontBackRestChair)
+				+ FVector::RightVector * DistanceFromtMidToRightBackRestChair);
+
+			// Location: bottom right looking at the table after the chairs.
+			TableToSpawnCollider.SetMinBounds((MinStartLocation + FVector::BackwardVector * DistanceFromMidToFrontBackRestChair)
+				+ FVector::LeftVector * DistanceFromtMidToRightBackRestChair);
+
+			DrawDebugSphere(GetWorld(), TableToSpawnCollider.GetMaxBounds(), 5.0f, 15, FColor::Black, true);
+			DrawDebugSphere(GetWorld(), TableToSpawnCollider.GetMinBounds(), 5.0f, 15, FColor::Yellow, true);
+
+			CustomCollisionSystem::FCustomCollisionResult Result;
+			if (CustomCollisionSystem::BoxTrace(TableToSpawnCollider, ECustomCollisionFlags::Static, Result))
+			{
+				UE_LOG(LogTemp, Warning, TEXT("HitActor = {%s}"), *Result.GetHitActor().GetObject()->GetName());
+			}
+			else
+			{
+				UE_LOG(LogTemp, Warning, TEXT("FAILED"));
+				ACustomShape::Create(GetWorld(), LinecastResult.GetHitPoint());
+			}
 		}
 	}
 }

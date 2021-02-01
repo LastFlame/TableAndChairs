@@ -34,7 +34,7 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Custom transform")
 	FCustomQuadTransform CustomTransform;
 
-	UPROPERTY(EditAnywhere, Category = "Custom colliders")
+	UPROPERTY(VisibleAnywhere, Category = "Custom colliders")
 	FCustomBoxCollider CustomBoxCollider;
 
 	UPROPERTY()
