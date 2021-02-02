@@ -6,6 +6,7 @@
 #include "DrawDebugHelpers.h"
 #include "TAC/CustomShapes/CustomShapesRenderer.h"
 #include "TAC/CustomShapeTemplateDataAsset.h"
+#include "TAC/CustomCollisions/CustomCollisionSystem.h"
 
 ACustomShape::ACustomShape() : RaycastCollidersArray(*this)
 {
@@ -176,9 +177,28 @@ bool ACustomShape::DragEdge(const FVector& ForwardDir, const FVector& RightDir, 
 
 		if (TableSizeX >= TableComponent->GetTableMinSize().X)
 		{
-			TableComponent->GetTransform().Size.X = TableSizeX;
-			TableComponent->GetTransform().Location.X -= ForwardDragDistance * (ForwardDotProd / ForwardDotProdAbs);
-			bDragged = true;
+			FCustomCubeTransform TableTransform = TableComponent->GetTransform();
+			TableTransform.Size.X = TableSizeX;
+			TableTransform.Location.X -= ForwardDragDistance * (ForwardDotProd / ForwardDotProdAbs);
+
+			TableComponent->GetCollider().SetFlag(ECustomCollisionFlags::Static);
+
+			FCustomBoxCollider BoxCollider;
+			TableComponent->CreateCollider(TableTransform, BoxCollider);
+
+			CustomCollisionSystem::FCustomCollisionResult CollisionResult;
+			if (!CustomCollisionSystem::BoxTrace(BoxCollider, ECustomCollisionFlags::Static, CollisionResult))
+			{
+				TableComponent->GetTransform() = TableTransform;
+				bDragged = true;
+				UE_LOG(LogTemp, Warning, TEXT("CAN BE TRAGGED X"));
+			}
+			else
+			{
+				UE_LOG(LogTemp, Warning, TEXT("DRAG COLLISION X. Actor = %s"), *CollisionResult.GetHitActor().GetObject()->GetName());
+			}
+
+			TableComponent->GetCollider().SetFlag(ECustomCollisionFlags::Dynamic);
 		}
 	}
 
@@ -188,9 +208,28 @@ bool ACustomShape::DragEdge(const FVector& ForwardDir, const FVector& RightDir, 
 
 		if (TableSizeY >= TableComponent->GetTableMinSize().Y)
 		{
-			TableComponent->GetTransform().Size.Y = TableSizeY;
-			TableComponent->GetTransform().Location.Y -= RightDragDistance * (RightDotProd / RightDotProdAbs);
-			bDragged = true;
+			FCustomCubeTransform TableTransform = TableComponent->GetTransform();
+			TableTransform.Size.Y = TableSizeY;
+			TableTransform.Location.Y -= RightDragDistance * (RightDotProd / RightDotProdAbs);
+
+			TableComponent->GetCollider().SetFlag(ECustomCollisionFlags::Static);
+
+			FCustomBoxCollider BoxCollider;
+			TableComponent->CreateCollider(TableTransform, BoxCollider);
+
+			CustomCollisionSystem::FCustomCollisionResult CollisionResult;
+			if (!CustomCollisionSystem::BoxTrace(BoxCollider, ECustomCollisionFlags::Static, CollisionResult))
+			{
+				TableComponent->GetTransform() = TableTransform;
+				bDragged = true;
+				UE_LOG(LogTemp, Warning, TEXT("CAN BE TRAGGED Y"));
+			}
+			else
+			{
+				UE_LOG(LogTemp, Warning, TEXT("DRAG COLLISION Y. Actor = %s"), *CollisionResult.GetHitActor().GetObject()->GetName());
+			}
+
+			TableComponent->GetCollider().SetFlag(ECustomCollisionFlags::Dynamic);
 		}
 	}
 

@@ -23,6 +23,7 @@ public:
 	const FCustomCubeTransform& GetCustomTransform() const { return CustomTransform; }
 
 	const FCustomBoxCollider& GetCustomBoxCollider() const { return CustomBoxCollider; }
+	const FCustomBoxCollider& GetDefaultTableBoundCollider() const { return DefaultTableBoundCollider; }
 	float GetColliderMaxBoundOffset() const { return ColliderMaxBoundOffset; }
 
 	const FVector2D& GetTableLegsSize() const { return TableLegsSize; }
@@ -48,6 +49,9 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "TableComponent|Custom colliders")
 	FCustomBoxCollider CustomBoxCollider;
+
+	UPROPERTY(VisibleAnywhere, Category = "TableComponent|Custom colliders")
+	FCustomBoxCollider DefaultTableBoundCollider;
 
 	UPROPERTY(EditAnywhere, Category = "TableComponent|Custom colliders")
 	float ColliderMaxBoundOffset;

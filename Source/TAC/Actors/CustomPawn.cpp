@@ -104,39 +104,13 @@ void ACustomPawn::ShootRaycast()
 
 			const UCustomShapeTemplateDataAsset& CustomShapeTemplateData = CustomGameMode->GetCustomShapeTemplateData();
 
-			const float DistanceFromMidToFrontBackRestChair = CustomShapeTemplateData.GetCustomTransform().Size.X + CustomShapeTemplateData.GetChairDistanceFromTableSide() 
-				+ CustomShapeTemplateData.GetChairSize().X + CustomShapeTemplateData.GetChairBackRestSize().X;
-			
-			const float DistanceFromtMidToRightBackRestChair = CustomShapeTemplateData.GetCustomTransform().Size.Y + CustomShapeTemplateData.GetChairDistanceFromTableSide()
-				+ CustomShapeTemplateData.GetChairSize().Y + CustomShapeTemplateData.GetChairBackRestSize().Y;
-
-			const FVector MinStartLocation = (CustomShapeTemplateData.GetCustomTransform().Location + LinecastResult.GetHitPoint()) 
-				- FVector::UpVector * (CustomShapeTemplateData.GetCustomTransform().Location.Z);
-
-			const FVector MaxStartLocation = (CustomShapeTemplateData.GetCustomTransform().Location + LinecastResult.GetHitPoint()) 
-				+ FVector::UpVector * CustomShapeTemplateData.GetColliderMaxBoundOffset();
-
 			FCustomBoxCollider TableToSpawnCollider;
-
-			// Location: top left looking at the table after the chairs.
-			TableToSpawnCollider.SetMaxBounds((MaxStartLocation + FVector::ForwardVector * DistanceFromMidToFrontBackRestChair)
-				+ FVector::RightVector * DistanceFromtMidToRightBackRestChair);
-
-			// Location: bottom right looking at the table after the chairs.
-			TableToSpawnCollider.SetMinBounds((MinStartLocation + FVector::BackwardVector * DistanceFromMidToFrontBackRestChair)
-				+ FVector::LeftVector * DistanceFromtMidToRightBackRestChair);
-
-			DrawDebugSphere(GetWorld(), TableToSpawnCollider.GetMaxBounds(), 5.0f, 15, FColor::Black, true);
-			DrawDebugSphere(GetWorld(), TableToSpawnCollider.GetMinBounds(), 5.0f, 15, FColor::Yellow, true);
+			TableToSpawnCollider.SetMinBounds(LinecastResult.GetHitPoint() + CustomShapeTemplateData.GetDefaultTableBoundCollider().GetMinBounds());
+			TableToSpawnCollider.SetMaxBounds(LinecastResult.GetHitPoint() + CustomShapeTemplateData.GetDefaultTableBoundCollider().GetMaxBounds());
 
 			CustomCollisionSystem::FCustomCollisionResult Result;
-			if (CustomCollisionSystem::BoxTrace(TableToSpawnCollider, ECustomCollisionFlags::Static, Result))
+			if (!CustomCollisionSystem::BoxTrace(TableToSpawnCollider, ECustomCollisionFlags::Static, Result))
 			{
-				UE_LOG(LogTemp, Warning, TEXT("HitActor = {%s}"), *Result.GetHitActor().GetObject()->GetName());
-			}
-			else
-			{
-				UE_LOG(LogTemp, Warning, TEXT("FAILED"));
 				ACustomShape::Create(GetWorld(), LinecastResult.GetHitPoint());
 			}
 		}

@@ -9,4 +9,20 @@ UCustomShapeTemplateDataAsset::UCustomShapeTemplateDataAsset() :
 	TableMinSize(CustomTransform.Size.X, CustomTransform.Size.Y), DistanceBetweenChairs(10.0f), ChairDistanceFromTableSide(30.0f),
 	ChairDistanceFromTableBottom(30.0f), ChairSize(20.0f, 18.0f, 1.0f), ChairLegsSize(1.0f, 1.0f), ChairBackRestSize(1.0f, 0.0f, 18.0f)
 {
+	const float DistanceFromMidToFrontBackRestChair = CustomTransform.Size.X + ChairDistanceFromTableSide+ ChairSize.X + ChairBackRestSize.X;
+	const float DistanceFromtMidToRightBackRestChair = CustomTransform.Size.Y + ChairDistanceFromTableSide + ChairSize.Y + ChairBackRestSize.Y;
+
+	const FVector MinStartLocation = CustomTransform.Location - FVector::UpVector * (CustomTransform.Location.Z);
+
+	const FVector MaxStartLocation = CustomTransform.Location + FVector::UpVector * ColliderMaxBoundOffset;
+
+	// Location: top left looking at the table after the chairs.
+	DefaultTableBoundCollider.SetMaxBounds((MaxStartLocation + FVector::ForwardVector * DistanceFromMidToFrontBackRestChair)
+		+ FVector::RightVector * DistanceFromtMidToRightBackRestChair);
+
+	// Location: bottom right looking at the table after the chairs.
+	DefaultTableBoundCollider.SetMinBounds((MinStartLocation + FVector::BackwardVector * DistanceFromMidToFrontBackRestChair)
+		+ FVector::LeftVector * DistanceFromtMidToRightBackRestChair);
+
+	DefaultTableBoundCollider.SetFlag(ECustomCollisionFlags::Dynamic);
 }
