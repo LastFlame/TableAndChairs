@@ -30,6 +30,8 @@ public:
 	bool Drag(const FCustomBaseCollider& Collider, const FVector& DragLocation);
 	bool DragEdge(const FVector& ForwardDir, const FVector& RightDir, const FVector& DragDir, float ForwardDragDistance, float RightDragDistance);
 
+	void ResetDraggableSphere();
+
 public:
 	/* ICustomRaycastHittable interface */
 	virtual const FCustomBaseCollider& GetBoundCollider() const { return TableComponent->GetCollider();  }
@@ -60,7 +62,6 @@ private:
 	UFUNCTION()
 	void OnBottomLeftSphereHit(const FVector& HitPoint);
 
-	UFUNCTION(CallInEditor, Category = "Debug")
 	void ShowDebugBoxCollider(const FCustomBoxCollider& BoxCollider, const FColor& Color) const;
 
 private:

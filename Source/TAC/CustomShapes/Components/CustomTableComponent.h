@@ -9,16 +9,6 @@
 
 class UCustomShapeTemplateDataAsset;
 
-//struct CreateColliderData
-//{
-//	FCustomCubeTransform Transform;
-//
-//	FVector ChairSize, ChairBackRestSize;
-//	FVector Up, Forward, Right;
-//
-//	float ChairDistanceFromTableSide, ColliderMaxBoundOffset;
-//};
-
 UCLASS(hideCategories = "ProceduralMesh")
 class TAC_API UCustomTableComponent : public UProceduralMeshComponent
 {
@@ -28,8 +18,6 @@ public:
 	UCustomTableComponent(const FObjectInitializer& ObjectInitializer);
 
 public:
-	//static FCustomBoxCollider CreateCollider(const CreateColliderData& ColliderData);
-
 	UFUNCTION(CallInEditor)
 	void DebugDraw();
 	FCustomCubeMeshData Draw();

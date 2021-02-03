@@ -121,6 +121,13 @@ void ACustomPawn::EndDrag()
 {
 	PlayerController->bShowMouseCursor = true;
 	bIsDragging = false;
+
+	if (!DraggableActor.IsValid() || DraggableCollider == nullptr || !DraggableCollider->GetHittableActor().IsValid())
+	{
+		return;
+	}
+
+	DraggableActor->ResetDraggableSphere();
 }
 
 void ACustomPawn::Drag() const

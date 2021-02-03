@@ -34,26 +34,6 @@ UCustomTableComponent::UCustomTableComponent(const FObjectInitializer& ObjectIni
 	CustomShapeBuffers.TangentsBuffer.Reserve(ReserveSize);
 }
 
-//FCustomBoxCollider UCustomTableComponent::CreateCollider(const CreateColliderData& ColliderData)
-//{
-//	const float DistanceFromMidToFrontBackRestChair = ColliderData.Transform.Size.X + ColliderData.ChairDistanceFromTableSide + ColliderData.ChairSize.X + ColliderData.ChairBackRestSize.X;
-//	const float DistanceFromtMidToRightBackRestChair = ColliderData.Transform.Size.Y + ColliderData.ChairDistanceFromTableSide + ColliderData.ChairSize.Y + ColliderData.ChairBackRestSize.Y;
-//	const FVector MinStartLocation = ColliderData.Transform.Location - ColliderData.Up * (ColliderData.Transform.Location.Z);
-//	const FVector MaxStartLocation = ColliderData.Transform.Location + ColliderData.Up * ColliderData.ColliderMaxBoundOffset;
-//
-//	FCustomBoxCollider Collider;
-//
-//	// Location: top left looking at the table after the chairs.
-//	Collider.SetMaxBounds((MaxStartLocation + ColliderData.Forward * DistanceFromMidToFrontBackRestChair)
-//		+ ColliderData.Right * DistanceFromtMidToRightBackRestChair);
-//
-//	// Location: bottom right looking at the table after the chairs.
-//	Collider.SetMinBounds((MinStartLocation + (ColliderData.Forward * - 1) * DistanceFromMidToFrontBackRestChair)
-//		+ (ColliderData.Right * - 1)* DistanceFromtMidToRightBackRestChair);
-//
-//	return Collider;
-//}
-
 void UCustomTableComponent::DebugDraw()
 {
 	Draw();
@@ -108,8 +88,8 @@ bool UCustomTableComponent::CreateCollider(const FCustomCubeTransform& Transform
 	const FVector& TableLeftNormal = TableNormals->LeftQuad.TopRight;
 	const FVector& TableBackNormal = TableNormals->BackQuad.TopRight;
 
-	const float DistanceFromMidToFrontBackRestChair = Transform.Size.X + ChairDistanceFromTableSide + ChairSize.X + ChairBackRestSize.X;
-	const float DistanceFromtMidToRightBackRestChair = Transform.Size.Y + ChairDistanceFromTableSide + ChairSize.Y + ChairBackRestSize.Y;
+	const float DistanceFromMidToFrontBackRestChair = Transform.Size.X + ChairDistanceFromTableSide + ChairSize.X + ChairBackRestSize.X + 5.0f;
+	const float DistanceFromtMidToRightBackRestChair = Transform.Size.Y + ChairDistanceFromTableSide + ChairSize.Y + ChairBackRestSize.Y + 5.0f;
 	const FVector MinStartLocation = Transform.Location - TableTopNormal * (Transform.Location.Z);
 	const FVector MaxStartLocation = Transform.Location + TableTopNormal * ColliderMaxBoundOffset;
 
@@ -145,18 +125,6 @@ void UCustomTableComponent::GenerateCollider()
 	}
 	
 	CreateCollider(CustomTransform, CustomBoxCollider);
-	//CreateColliderData ColliderData
-	//{
-	//	CustomTransform,
-	//	ChairSize,
-	//	ChairBackRestSize,
-	//	TableNormals->TopQuad.TopRight,
-	//	TableNormals->FrontQuad.TopRight,
-	//	TableNormals->RightQuad.TopRight,
-	//	ChairDistanceFromTableSide,
-	//	ColliderMaxBoundOffset
-	//};
-	//CustomBoxCollider = CreateCollider(ColliderData);
 }
 
 void UCustomTableComponent::GenerateCollider(const FVector& MinBounds, const FVector& MaxBounds)

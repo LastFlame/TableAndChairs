@@ -127,7 +127,6 @@ bool ACustomShape::Drag(const FCustomBaseCollider& Collider, const FVector& Drag
 		if (DragEdge(Table.Normals->BackQuad.TopRight, Table.Normals->RightQuad.TopRight, DragDir, DragThreshold, -DragThreshold))
 		{
 			Generate();
-			return true;
 		}
 	}
 
@@ -136,7 +135,6 @@ bool ACustomShape::Drag(const FCustomBaseCollider& Collider, const FVector& Drag
 		if (DragEdge(Table.Normals->FrontQuad.TopRight, Table.Normals->RightQuad.TopRight, DragDir, -DragThreshold, -DragThreshold))
 		{
 			Generate();
-			return true;
 		}
 	}
 
@@ -145,7 +143,6 @@ bool ACustomShape::Drag(const FCustomBaseCollider& Collider, const FVector& Drag
 		if (DragEdge(Table.Normals->BackQuad.TopRight, Table.Normals->LeftQuad.TopRight, DragDir, DragThreshold, DragThreshold))
 		{
 			Generate();
-			return true;
 		}
 	}
 
@@ -154,11 +151,10 @@ bool ACustomShape::Drag(const FCustomBaseCollider& Collider, const FVector& Drag
 		if (DragEdge(Table.Normals->FrontQuad.TopRight, Table.Normals->LeftQuad.TopRight, DragDir, -DragThreshold, DragThreshold))
 		{
 			Generate();
-			return true;
 		}
 	}
 
-	return false;
+	return true;
 }
 
 bool ACustomShape::DragEdge(const FVector& ForwardDir, const FVector& RightDir, const FVector& DragDir, float ForwardDragDistance, float RightDragDistance)
@@ -231,6 +227,14 @@ bool ACustomShape::DragEdge(const FVector& ForwardDir, const FVector& RightDir, 
 	return bDragged;
 }
 
+void ACustomShape::ResetDraggableSphere()
+{
+	if (PrevHitSphere != nullptr)
+	{
+		PrevHitSphere->SetMaterial(0, nullptr);
+	}
+}
+
 void ACustomShape::OnBoundColliderHit(const FVector& HitPoint)
 {
 	TableComponent->SetMaterial(0, OnSelectedTableMat);
@@ -238,20 +242,13 @@ void ACustomShape::OnBoundColliderHit(const FVector& HitPoint)
 
 void ACustomShape::OnBoundColliderHitChanged()
 {
-	if (PrevHitSphere != nullptr)
-	{
-		PrevHitSphere->SetMaterial(0, nullptr);
-	}
-
+	ResetDraggableSphere();
 	TableComponent->SetMaterial(0, nullptr);
 }
 
 void ACustomShape::OnTopRightSphereHit(const FVector& HitPoint)
 {
-	if (PrevHitSphere)
-	{
-		PrevHitSphere->SetMaterial(0, nullptr);
-	}
+	ResetDraggableSphere();
 
 	TopRightSphereComponent->SetMaterial(0, OnSphereSelectedMat);
 	PrevHitSphere = TopRightSphereComponent;
@@ -259,10 +256,7 @@ void ACustomShape::OnTopRightSphereHit(const FVector& HitPoint)
 
 void ACustomShape::OnBottomRightSphereHit(const FVector& HitPoint)
 {
-	if (PrevHitSphere)
-	{
-		PrevHitSphere->SetMaterial(0, nullptr);
-	}
+	ResetDraggableSphere();
 
 	BottomRightSphereComponent->SetMaterial(0, OnSphereSelectedMat);
 	PrevHitSphere = BottomRightSphereComponent;
@@ -270,10 +264,7 @@ void ACustomShape::OnBottomRightSphereHit(const FVector& HitPoint)
 
 void ACustomShape::OnTopLeftSphereHit(const FVector& HitPoint)
 {
-	if (PrevHitSphere)
-	{
-		PrevHitSphere->SetMaterial(0, nullptr);
-	}
+	ResetDraggableSphere();
 
 	TopLeftSphereComponent->SetMaterial(0, OnSphereSelectedMat);
 	PrevHitSphere = TopLeftSphereComponent;
@@ -281,10 +272,7 @@ void ACustomShape::OnTopLeftSphereHit(const FVector& HitPoint)
 
 void ACustomShape::OnBottomLeftSphereHit(const FVector& HitPoint)
 {
-	if (PrevHitSphere)
-	{
-		PrevHitSphere->SetMaterial(0, nullptr);
-	}
+	ResetDraggableSphere();
 
 	BottomLeftSphereComponent->SetMaterial(0, OnSphereSelectedMat);
 	PrevHitSphere = BottomLeftSphereComponent;
