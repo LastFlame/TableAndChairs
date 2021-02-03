@@ -84,7 +84,7 @@ void ACustomPawn::ShootRaycast()
 
 		DrawDebugSphere(GetWorld(), LinecastResult.GetHitPoint(), 5.0f, 15.0f, FColor::Red, false, 5.0f);
 
-		if (HitObject->IsA(ACustomShape::StaticClass())) // TO DO IDraggable Interface.
+		if (HitObject->IsA(ACustomShape::StaticClass()) && LinecastResult.GetHitCollider() != nullptr) // TO DO IDraggable Interface.
 		{
 			PlayerController->GetMousePosition(SavedMouseX, SavedMouseY);
 			PlayerController->bShowMouseCursor = false;

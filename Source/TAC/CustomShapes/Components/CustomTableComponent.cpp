@@ -113,6 +113,8 @@ bool UCustomTableComponent::CreateCollider(const FCustomCubeTransform& Transform
 	const FVector MinStartLocation = Transform.Location - TableTopNormal * (Transform.Location.Z);
 	const FVector MaxStartLocation = Transform.Location + TableTopNormal * ColliderMaxBoundOffset;
 
+	OutBoxCollider.SetLocation(Transform.Location);
+
 	// Location: top left looking at the table after the chairs.
 	OutBoxCollider.SetMaxBounds((MaxStartLocation + TableFrontNormal * DistanceFromMidToFrontBackRestChair)
 		+ TableRightNormal * DistanceFromtMidToRightBackRestChair);

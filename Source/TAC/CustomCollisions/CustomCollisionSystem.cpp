@@ -132,7 +132,7 @@ namespace CustomCollisionSystem {
 
 			for (FCustomBaseCollider* Collider : OutCollisionResult.HitActor->GetColliders().GetArray())
 			{
-				if (Collider != nullptr)
+				if (Collider == nullptr)
 				{
 					continue;
 				}

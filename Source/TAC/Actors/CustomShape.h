@@ -61,7 +61,7 @@ private:
 	void OnBottomLeftSphereHit(const FVector& HitPoint);
 
 	UFUNCTION(CallInEditor, Category = "Debug")
-	void ShowDebugBoxCollider() const;
+	void ShowDebugBoxCollider(const FCustomBoxCollider& BoxCollider, const FColor& Color) const;
 
 private:
 	UPROPERTY(EditAnywhere, Category = "Components")

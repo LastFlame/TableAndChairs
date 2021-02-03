@@ -81,7 +81,7 @@ void ACustomShape::Generate()
 
 	FCustomCubeMeshData Table = TableComponent->Draw();
 	TableComponent->GenerateCollider();
-	ShowDebugBoxCollider();
+	ShowDebugBoxCollider(TableComponent->GetCollider(), FColor::Red);
 
 	TopRightSphereComponent->Draw(Table.Positions->TopQuad.TopRight, SphereRadius);
 	TopRightSphereComponent->GenerateCollider();
@@ -186,16 +186,14 @@ bool ACustomShape::DragEdge(const FVector& ForwardDir, const FVector& RightDir, 
 			FCustomBoxCollider BoxCollider;
 			TableComponent->CreateCollider(TableTransform, BoxCollider);
 
+			//FlushPersistentDebugLines(GetWorld());
+			//ShowDebugBoxCollider(BoxCollider, FColor::Green);
+
 			CustomCollisionSystem::FCustomCollisionResult CollisionResult;
 			if (!CustomCollisionSystem::BoxTrace(BoxCollider, ECustomCollisionFlags::Static, CollisionResult))
 			{
 				TableComponent->GetTransform() = TableTransform;
 				bDragged = true;
-				UE_LOG(LogTemp, Warning, TEXT("CAN BE TRAGGED X"));
-			}
-			else
-			{
-				UE_LOG(LogTemp, Warning, TEXT("DRAG COLLISION X. Actor = %s"), *CollisionResult.GetHitActor().GetObject()->GetName());
 			}
 
 			TableComponent->GetCollider().SetFlag(ECustomCollisionFlags::Dynamic);
@@ -216,17 +214,14 @@ bool ACustomShape::DragEdge(const FVector& ForwardDir, const FVector& RightDir, 
 
 			FCustomBoxCollider BoxCollider;
 			TableComponent->CreateCollider(TableTransform, BoxCollider);
+			//FlushPersistentDebugLines(GetWorld());
+			//ShowDebugBoxCollider(BoxCollider, FColor::Green);
 
 			CustomCollisionSystem::FCustomCollisionResult CollisionResult;
 			if (!CustomCollisionSystem::BoxTrace(BoxCollider, ECustomCollisionFlags::Static, CollisionResult))
 			{
 				TableComponent->GetTransform() = TableTransform;
 				bDragged = true;
-				UE_LOG(LogTemp, Warning, TEXT("CAN BE TRAGGED Y"));
-			}
-			else
-			{
-				UE_LOG(LogTemp, Warning, TEXT("DRAG COLLISION Y. Actor = %s"), *CollisionResult.GetHitActor().GetObject()->GetName());
 			}
 
 			TableComponent->GetCollider().SetFlag(ECustomCollisionFlags::Dynamic);
@@ -295,15 +290,15 @@ void ACustomShape::OnBottomLeftSphereHit(const FVector& HitPoint)
 	PrevHitSphere = BottomLeftSphereComponent;
 }
 
-void ACustomShape::ShowDebugBoxCollider() const
+void ACustomShape::ShowDebugBoxCollider(const FCustomBoxCollider& BoxCollider, const FColor& Color) const
 {
 	if (TableComponent == nullptr)
 	{
 		return;
 	}
 
-	const FVector& BackBottomLeftStart = TableComponent->GetCollider().GetMinBounds();
-	const FVector& FrontTopRightStart = TableComponent->GetCollider().GetMaxBounds();
+	const FVector& BackBottomLeftStart = BoxCollider.GetMinBounds();
+	const FVector& FrontTopRightStart = BoxCollider.GetMaxBounds();
 
 	const float XSize = FrontTopRightStart.X - BackBottomLeftStart.X;
 	const float YSize = FrontTopRightStart.Y - BackBottomLeftStart.Y;
@@ -315,20 +310,20 @@ void ACustomShape::ShowDebugBoxCollider() const
 	const FVector FrontBottomRightStart = FrontTopRightStart + FVector::DownVector * ZSize;
 	const FVector FrontBottomLeftStart = FrontBottomRightStart + FVector::LeftVector * YSize;
 
-	DrawDebugLine(GetWorld(), BackBottomLeftStart, BackBottomLeftStart + FVector::RightVector * YSize, FColor::Red, true, -1.0f, 0, 1.0f);
-	DrawDebugLine(GetWorld(), BackBottomLeftStart, BackBottomLeftStart + FVector::UpVector * ZSize, FColor::Red, true, -1.0f, 0, 1.0f);
-	DrawDebugLine(GetWorld(), BackBottomLeftStart, BackBottomLeftStart + FVector::ForwardVector * XSize, FColor::Red, true, -1.0f, 0, 1.0f);
+	DrawDebugLine(GetWorld(), BackBottomLeftStart, BackBottomLeftStart + FVector::RightVector * YSize, Color, true, -1.0f, 0, 1.0f);
+	DrawDebugLine(GetWorld(), BackBottomLeftStart, BackBottomLeftStart + FVector::UpVector * ZSize, Color, true, -1.0f, 0, 1.0f);
+	DrawDebugLine(GetWorld(), BackBottomLeftStart, BackBottomLeftStart + FVector::ForwardVector * XSize, Color, true, -1.0f, 0, 1.0f);
 
-	DrawDebugLine(GetWorld(), FrontTopRightStart, FrontTopRightStart + FVector::LeftVector * YSize, FColor::Red, true, -1.0f, 0, 1.0f);
-	DrawDebugLine(GetWorld(), FrontTopRightStart, FrontTopRightStart + FVector::DownVector * ZSize, FColor::Red, true, -1.0f, 0, 1.0f);
-	DrawDebugLine(GetWorld(), FrontTopRightStart, FrontTopRightStart + FVector::BackwardVector * XSize, FColor::Red, true, -1.0f, 0, 1.0f);
+	DrawDebugLine(GetWorld(), FrontTopRightStart, FrontTopRightStart + FVector::LeftVector * YSize, Color, true, -1.0f, 0, 1.0f);
+	DrawDebugLine(GetWorld(), FrontTopRightStart, FrontTopRightStart + FVector::DownVector * ZSize, Color, true, -1.0f, 0, 1.0f);
+	DrawDebugLine(GetWorld(), FrontTopRightStart, FrontTopRightStart + FVector::BackwardVector * XSize, Color, true, -1.0f, 0, 1.0f);
 
-	DrawDebugLine(GetWorld(), FrontBottomRightStart, FrontBottomRightStart + FVector::BackwardVector * XSize, FColor::Red, true, -1.0f, 0, 1.0f);
-	DrawDebugLine(GetWorld(), FrontBottomRightStart, FrontBottomRightStart + FVector::LeftVector * YSize, FColor::Red, true, -1.0f, 0, 1.0f);
+	DrawDebugLine(GetWorld(), FrontBottomRightStart, FrontBottomRightStart + FVector::BackwardVector * XSize, Color, true, -1.0f, 0, 1.0f);
+	DrawDebugLine(GetWorld(), FrontBottomRightStart, FrontBottomRightStart + FVector::LeftVector * YSize, Color, true, -1.0f, 0, 1.0f);
 
-	DrawDebugLine(GetWorld(), BackTopLeftStart, BackTopLeftStart + FVector::ForwardVector * XSize, FColor::Red, true, -1.0f, 0, 1.0f);
-	DrawDebugLine(GetWorld(), BackTopLeftStart, BackTopLeftStart + FVector::RightVector * YSize, FColor::Red, true, -1.0f, 0, 1.0f);
+	DrawDebugLine(GetWorld(), BackTopLeftStart, BackTopLeftStart + FVector::ForwardVector * XSize, Color, true, -1.0f, 0, 1.0f);
+	DrawDebugLine(GetWorld(), BackTopLeftStart, BackTopLeftStart + FVector::RightVector * YSize, Color, true, -1.0f, 0, 1.0f);
 
-	DrawDebugLine(GetWorld(), BackBottomRightStart, BackBottomRightStart + FVector::UpVector * ZSize, FColor::Red, true, -1.0f, 0, 1.0f);
-	DrawDebugLine(GetWorld(), FrontBottomLeftStart, FrontBottomLeftStart + FVector::UpVector * ZSize, FColor::Red, true, -1.0f, 0, 1.0f);
+	DrawDebugLine(GetWorld(), BackBottomRightStart, BackBottomRightStart + FVector::UpVector * ZSize, Color, true, -1.0f, 0, 1.0f);
+	DrawDebugLine(GetWorld(), FrontBottomLeftStart, FrontBottomLeftStart + FVector::UpVector * ZSize, Color, true, -1.0f, 0, 1.0f);
 }
