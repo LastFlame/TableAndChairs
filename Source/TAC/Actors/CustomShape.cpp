@@ -34,7 +34,7 @@ ACustomShape::ACustomShape() : RaycastCollidersArray(*this)
 	BottomLeftSphereComponent->GetCollider().SetFlag(ECustomCollisionFlags::Dynamic);
 
 	static ConstructorHelpers::FObjectFinder<UCustomShapeTemplateDataAsset> CustomShapeDataAsset(TEXT("CustomShapeTemplateDataAsset'/Game/TAC/CustomShapeTemplateDataAsset.CustomShapeTemplateDataAsset'"));
-	if (CustomShapeDataAsset.Object != NULL)
+	if (CustomShapeDataAsset.Object != nullptr)
 	{
 		CustomShapeTemplateData = CustomShapeDataAsset.Object;
 		SphereRadius = CustomShapeTemplateData->GetSphereRadius();
@@ -42,17 +42,23 @@ ACustomShape::ACustomShape() : RaycastCollidersArray(*this)
 	}
 
 	static ConstructorHelpers::FObjectFinder<UMaterial> SphereMaterial(TEXT("Material'/Game/StarterContent/Materials/M_Metal_Gold.M_Metal_Gold'"));
-	if (SphereMaterial.Object != NULL)
+	if (SphereMaterial.Object != nullptr)
 	{
 		OnSphereSelectedMat = (UMaterial*)SphereMaterial.Object;
 	}
 
-	static ConstructorHelpers::FObjectFinder<UMaterial> TableMaterial(TEXT("Material'/Game/StarterContent/Materials/M_Basic_Floor.M_Basic_Floor'"));
-	if (SphereMaterial.Object != NULL)
+	static ConstructorHelpers::FObjectFinder<UMaterial> SelectedTableMaterial(TEXT("Material'/Game/StarterContent/Materials/M_Basic_Floor.M_Basic_Floor'"));
+	if (SelectedTableMaterial.Object != nullptr)
 	{
-		OnSelectedTableMat = (UMaterial*)TableMaterial.Object;
+		OnSelectedTableMat = (UMaterial*)SelectedTableMaterial.Object;
 	}
 	
+	static ConstructorHelpers::FObjectFinder<UMaterial> MovingTableMaterial(TEXT("Material'/Game/StarterContent/Materials/M_Basic_Wall.M_Basic_Wall'"));
+	if (MovingTableMaterial.Object != nullptr)
+	{
+		OnMovingTableMat = (UMaterial*)MovingTableMaterial.Object;
+	}
+
 	RaycastCollidersArray.Add(TopRightSphereComponent->GetCollider());
 	RaycastCollidersArray.Add(BottomRightSphereComponent->GetCollider());
 	RaycastCollidersArray.Add(TopLeftSphereComponent->GetCollider());
@@ -225,6 +231,33 @@ bool ACustomShape::DragEdge(const FVector& ForwardDir, const FVector& RightDir, 
 	}
 
 	return bDragged;
+}
+
+bool ACustomShape::Move(const FVector& Location)
+{
+	FCustomBoxCollider BoxCollider;
+
+	const FVector NewTableLocation = TableComponent->GetTransform().Location + Location;
+	BoxCollider.SetLocation(NewTableLocation);
+	
+	FCustomBoxCollider& TableCollider = TableComponent->GetCollider();
+	BoxCollider.SetMinBounds(TableCollider.GetMinBounds() + Location);
+	BoxCollider.SetMaxBounds(TableCollider.GetMaxBounds() + Location);
+	BoxCollider.SetFlag(ECustomCollisionFlags::Static);
+
+	TableCollider.SetFlag(ECustomCollisionFlags::Static);
+	CustomCollisionSystem::FCustomCollisionResult CollisionResult;
+	bool bCollisionSuccessul = CustomCollisionSystem::BoxTrace(BoxCollider, ECustomCollisionFlags::Static, CollisionResult);
+	TableCollider.SetFlag(ECustomCollisionFlags::Dynamic);
+
+	if(bCollisionSuccessul)
+	{
+		return false;
+	}
+	
+	TableComponent->GetTransform().Location = NewTableLocation;
+	Generate();
+	return true;
 }
 
 void ACustomShape::ResetDraggableSphere()

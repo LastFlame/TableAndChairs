@@ -30,6 +30,8 @@ public:
 	bool Drag(const FCustomBaseCollider& Collider, const FVector& DragLocation);
 	bool DragEdge(const FVector& ForwardDir, const FVector& RightDir, const FVector& DragDir, float ForwardDragDistance, float RightDragDistance);
 
+	bool Move(const FVector& Location);
+
 	void ResetDraggableSphere();
 
 public:
@@ -94,6 +96,9 @@ private:
 
 	UPROPERTY(VisibleAnywhere, Category = "Mesh values")
 	UMaterialInterface* OnSelectedTableMat;
+
+	UPROPERTY(VisibleAnywhere, Category = "Mesh values")
+	UMaterialInterface* OnMovingTableMat;
 
 	UPROPERTY()
 	UCustomShapeTemplateDataAsset* CustomShapeTemplateData;

@@ -10,6 +10,8 @@
 #include "GameFramework/FloatingPawnMovement.h"
 #include "TAC/CustomShapeTemplateDataAsset.h"
 #include "TAC/CustomGameMode.h"
+#include "Math/UnrealMathUtility.h"
+#include "GenericPlatform/GenericPlatformMath.h"
 
 static TWeakObjectPtr<ACustomShape> DraggableActor;
 static FCustomBaseCollider* DraggableCollider = nullptr;
@@ -17,6 +19,15 @@ static FCustomBaseCollider* DraggableCollider = nullptr;
 static float X, Y;
 static float SavedMouseX, SavedMouseY;
 static bool bIsDragging = false;
+
+static bool bIsMoving = false;
+static FVector SavedLocation;
+
+float AngleBetweenVectors(const FVector& V1, const FVector& V2)
+{
+	return FMath::Acos(FVector::DotProduct(V1, V2) / (V1.Size() * V2.Size()));
+}
+
 
 ACustomPawn::ACustomPawn() : PanSpeed(5.0f), bRotating(false)
 {
@@ -84,15 +95,30 @@ void ACustomPawn::ShootRaycast()
 
 		DrawDebugSphere(GetWorld(), LinecastResult.GetHitPoint(), 5.0f, 15.0f, FColor::Red, false, 5.0f);
 
-		if (HitObject->IsA(ACustomShape::StaticClass()) && LinecastResult.GetHitCollider() != nullptr) // TO DO IDraggable Interface.
+		if (HitObject->IsA(ACustomShape::StaticClass())) // TO DO IDraggable Interface.
 		{
-			PlayerController->GetMousePosition(SavedMouseX, SavedMouseY);
-			PlayerController->bShowMouseCursor = false;
-
 			DraggableActor = Cast<ACustomShape>(HitObject);
-			DraggableCollider = LinecastResult.GetHitCollider();
+			PlayerController->CurrentMouseCursor = EMouseCursor::GrabHandClosed;
+			PlayerController->GetMousePosition(SavedMouseX, SavedMouseY);
 
-			bIsDragging = true;
+			if (LinecastResult.GetHitCollider() != nullptr)
+			{
+				PlayerController->bShowMouseCursor = false;
+				DraggableCollider = LinecastResult.GetHitCollider();
+				bIsDragging = true;
+			}
+			else
+			{
+				const FVector& TableLocation = DraggableActor->GetCustomTransform().Location;
+				const float Height = abs(GetActorLocation().Z - TableLocation.Z);
+
+				const FVector PlaneProjection(WorldDirection.X, WorldDirection.Y, 0.0f);
+				const float AngleBetweenTableAndPoint = AngleBetweenVectors(WorldDirection, PlaneProjection);
+				const float Hypotenuse = Height / FMath::Sin(AngleBetweenTableAndPoint);
+				SavedLocation = GetActorLocation() + (WorldDirection * Hypotenuse);
+
+				bIsMoving = true;
+			}
 		}
 		else if (HitObject->IsA(ACustomGround::StaticClass()))
 		{
@@ -119,15 +145,25 @@ void ACustomPawn::ShootRaycast()
 
 void ACustomPawn::EndDrag()
 {
-	PlayerController->bShowMouseCursor = true;
-	bIsDragging = false;
+	PlayerController->CurrentMouseCursor = EMouseCursor::Default;
 
-	if (!DraggableActor.IsValid() || DraggableCollider == nullptr || !DraggableCollider->GetHittableActor().IsValid())
+	if (bIsDragging)
 	{
-		return;
+		PlayerController->bShowMouseCursor = true;
+		bIsDragging = false;
+
+		if (!DraggableActor.IsValid() || DraggableCollider == nullptr || !DraggableCollider->GetHittableActor().IsValid())
+		{
+			return;
+		}
+
+		DraggableActor->ResetDraggableSphere();
 	}
 
-	DraggableActor->ResetDraggableSphere();
+	if (bIsMoving)
+	{
+		bIsMoving = false;
+	}
 }
 
 void ACustomPawn::Drag() const
@@ -149,6 +185,53 @@ void ACustomPawn::Drag() const
 		FVector2D MouseLoc;
 		PlayerController->ProjectWorldLocationToScreen(DraggableCollider->GetLocation(), MouseLoc);
 		PlayerController->SetMouseLocation(MouseLoc.X, MouseLoc.Y);
+	}
+}
+
+void ACustomPawn::Move() const
+{
+	if (!DraggableActor.IsValid())
+	{
+		return;
+	}
+	
+	FVector WorldLocation, WorldDirection;
+	PlayerController->DeprojectMousePositionToWorld(WorldLocation, WorldDirection);
+
+	const FVector& TableLocation = DraggableActor->GetCustomTransform().Location;
+	const float Height = abs(GetActorLocation().Z - TableLocation.Z);
+
+	const FVector PlaneProjection(WorldDirection.X, WorldDirection.Y, 0.0f);
+	const float AngleBetweenTableAndPoint = AngleBetweenVectors(WorldDirection, PlaneProjection);
+	const float Hypotenuse = Height / FMath::Sin(AngleBetweenTableAndPoint);
+	const FVector NewTableLocation = GetActorLocation() + (WorldDirection * Hypotenuse);
+
+	//FlushPersistentDebugLines(GetWorld());
+	////UE_LOG(LogTemp, Warning, TEXT("Center %s"), *NewTableLocation.ToString());
+	//DrawDebugSphere(GetWorld(), SavedLocation, 5.0f, 15, FColor::Green, true);
+	//DrawDebugSphere(GetWorld(), NewTableLocation, 5.0f, 15, FColor::Red, true);
+	//DrawDebugSphere(GetWorld(), TableLocation, 5.0f, 15, FColor::Black, true);
+	//DrawDebugSphere(GetWorld(), GetActorLocation(), 5.0f, 15, FColor::Magenta, true);
+
+	//// HEIGHT PROJECTION
+	//const FVector HeightVector = GetActorLocation() + FVector::DownVector * Height;
+	//DrawDebugLine(GetWorld(), GetActorLocation(), HeightVector, FColor::Yellow, true);	
+
+	//// MOUSE PROJECTION DIR
+	//DrawDebugLine(GetWorld(), GetActorLocation(), GetActorLocation() + WorldDirection  * 5000, FColor::Green, true);	
+
+	//// MOUSE PLANE PROJECTION DIR 
+	//DrawDebugLine(GetWorld(),HeightVector, HeightVector + PlaneProjection * 5000, FColor::Red, true);		
+
+	if (FVector::Distance(SavedLocation, NewTableLocation) < 5.0f)
+	{
+		return;
+	}
+
+	const FVector TableMoveDir = NewTableLocation - SavedLocation;
+	if (DraggableActor->Move(TableMoveDir.GetSafeNormal() * TableMoveDir.Size()))
+	{
+		SavedLocation = NewTableLocation;
 	}
 }
 
@@ -225,6 +308,11 @@ void ACustomPawn::Tick(float DeltaTime)
 	if (bIsDragging)
 	{
 		Drag();
+	}
+
+	if (bIsMoving)
+	{
+		Move();
 	}
 }
 
