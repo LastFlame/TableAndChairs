@@ -7,6 +7,13 @@
 #include "TAC/CustomShapes/CustomShapesRenderer.h"
 #include "TAC/CustomShapeTemplateDataAsset.h"
 #include "TAC/CustomCollisions/CustomCollisionSystem.h"
+#include "TAC/CustomGameMode.h"
+
+static bool IsLocationBetweenBounds(const FVector2D& LocationBounds, const FVector& MinLocation, const FVector& MaxLocation)
+{
+	return !(MinLocation.Y < -LocationBounds.Y || MinLocation.X < -LocationBounds.X
+		|| MaxLocation.Y > LocationBounds.Y || MaxLocation.X > LocationBounds.X);
+}
 
 ACustomShape::ACustomShape() : RaycastCollidersArray(*this)
 {
@@ -76,6 +83,30 @@ ACustomShape::ACustomShape() : RaycastCollidersArray(*this)
 
 void ACustomShape::Create(UWorld* World, const FVector& Location)
 {
+	const ACustomGameMode* CustomGameMode = Cast<const ACustomGameMode>(World->GetAuthGameMode());
+	if (CustomGameMode == nullptr)
+	{
+		return;
+	}
+
+	const UCustomShapeTemplateDataAsset& CustomShapeTemplateData = CustomGameMode->GetCustomShapeTemplateData();
+	const FCustomBoxCollider& TableDefaultBounds = CustomShapeTemplateData.GetDefaultTableBoundCollider();
+
+	FCustomBoxCollider TableToSpawnCollider;
+	TableToSpawnCollider.SetMinBounds(Location + TableDefaultBounds.GetMinBounds());
+	TableToSpawnCollider.SetMaxBounds(Location + TableDefaultBounds.GetMaxBounds());
+
+	if (!IsLocationBetweenBounds(CustomShapeTemplateData.GetLocationBounds(), TableToSpawnCollider.GetMinBounds(), TableToSpawnCollider.GetMaxBounds()))
+	{
+		return;
+	}
+
+	CustomCollisionSystem::FCustomCollisionResult Result;
+	if (CustomCollisionSystem::BoxTrace(TableToSpawnCollider, ECustomCollisionFlags::Static, Result))
+	{
+		return;
+	}
+
 	ACustomShape* CustomShape = World->SpawnActor<ACustomShape>(FVector::ZeroVector, FRotator::ZeroRotator);
 	CustomShape->SetCustomLocation(Location.X, Location.Y);
 	CustomShape->Generate();
@@ -192,7 +223,7 @@ bool ACustomShape::DragEdge(const FVector& ForwardDir, const FVector& RightDir, 
 			//ShowDebugBoxCollider(BoxCollider, FColor::Green);
 
 			CustomCollisionSystem::FCustomCollisionResult CollisionResult;
-			if (!CustomCollisionSystem::BoxTrace(BoxCollider, ECustomCollisionFlags::Static, CollisionResult))
+			if (!CustomCollisionSystem::BoxTrace(BoxCollider, ECustomCollisionFlags::Static, CollisionResult) && IsBetweenLocationBounds(BoxCollider))
 			{
 				TableComponent->GetTransform() = TableTransform;
 				bDragged = true;
@@ -220,7 +251,7 @@ bool ACustomShape::DragEdge(const FVector& ForwardDir, const FVector& RightDir, 
 			//ShowDebugBoxCollider(BoxCollider, FColor::Green);
 
 			CustomCollisionSystem::FCustomCollisionResult CollisionResult;
-			if (!CustomCollisionSystem::BoxTrace(BoxCollider, ECustomCollisionFlags::Static, CollisionResult))
+			if (!CustomCollisionSystem::BoxTrace(BoxCollider, ECustomCollisionFlags::Static, CollisionResult) && IsBetweenLocationBounds(BoxCollider))
 			{
 				TableComponent->GetTransform() = TableTransform;
 				bDragged = true;
@@ -241,16 +272,26 @@ bool ACustomShape::Move(const FVector& Location)
 	BoxCollider.SetLocation(NewTableLocation);
 	
 	FCustomBoxCollider& TableCollider = TableComponent->GetCollider();
-	BoxCollider.SetMinBounds(TableCollider.GetMinBounds() + Location);
-	BoxCollider.SetMaxBounds(TableCollider.GetMaxBounds() + Location);
-	BoxCollider.SetFlag(ECustomCollisionFlags::Static);
+	const FVector NewMinBounds = TableCollider.GetMinBounds() + Location;
+	const FVector NewMaxBounds = TableCollider.GetMaxBounds() + Location;
 
+	BoxCollider.SetMinBounds(NewMinBounds);
+	BoxCollider.SetMaxBounds(NewMaxBounds);
+
+	BoxCollider.SetFlag(ECustomCollisionFlags::Static);
 	TableCollider.SetFlag(ECustomCollisionFlags::Static);
+
 	CustomCollisionSystem::FCustomCollisionResult CollisionResult;
 	bool bCollisionSuccessul = CustomCollisionSystem::BoxTrace(BoxCollider, ECustomCollisionFlags::Static, CollisionResult);
+
 	TableCollider.SetFlag(ECustomCollisionFlags::Dynamic);
 
 	if(bCollisionSuccessul)
+	{
+		return false;
+	}
+
+	if (!IsBetweenLocationBounds(BoxCollider))
 	{
 		return false;
 	}
@@ -309,6 +350,11 @@ void ACustomShape::OnBottomLeftSphereHit(const FVector& HitPoint)
 
 	BottomLeftSphereComponent->SetMaterial(0, OnSphereSelectedMat);
 	PrevHitSphere = BottomLeftSphereComponent;
+}
+
+bool ACustomShape::IsBetweenLocationBounds(const FCustomBoxCollider& BoxCollider) const
+{
+	return IsLocationBetweenBounds(CustomShapeTemplateData->GetLocationBounds(), BoxCollider.GetMinBounds(), BoxCollider.GetMaxBounds());
 }
 
 void ACustomShape::ShowDebugBoxCollider(const FCustomBoxCollider& BoxCollider, const FColor& Color) const

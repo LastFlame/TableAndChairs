@@ -122,23 +122,7 @@ void ACustomPawn::ShootRaycast()
 		}
 		else if (HitObject->IsA(ACustomGround::StaticClass()))
 		{
-			const ACustomGameMode* CustomGameMode = Cast<const ACustomGameMode>(GetWorld()->GetAuthGameMode());
-			if (CustomGameMode == nullptr)
-			{
-				return;
-			}
-
-			const UCustomShapeTemplateDataAsset& CustomShapeTemplateData = CustomGameMode->GetCustomShapeTemplateData();
-
-			FCustomBoxCollider TableToSpawnCollider;
-			TableToSpawnCollider.SetMinBounds(LinecastResult.GetHitPoint() + CustomShapeTemplateData.GetDefaultTableBoundCollider().GetMinBounds());
-			TableToSpawnCollider.SetMaxBounds(LinecastResult.GetHitPoint() + CustomShapeTemplateData.GetDefaultTableBoundCollider().GetMaxBounds());
-
-			CustomCollisionSystem::FCustomCollisionResult Result;
-			if (!CustomCollisionSystem::BoxTrace(TableToSpawnCollider, ECustomCollisionFlags::Static, Result))
-			{
-				ACustomShape::Create(GetWorld(), LinecastResult.GetHitPoint());
-			}
+			ACustomShape::Create(GetWorld(), LinecastResult.GetHitPoint());
 		}
 	}
 }

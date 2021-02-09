@@ -2,6 +2,7 @@
 
 
 #include "CustomGround.h"
+#include "TAC/CustomShapeTemplateDataAsset.h"
 
 ACustomGround::ACustomGround() : RaycastCollidersArray(*this)
 {
@@ -11,6 +12,14 @@ ACustomGround::ACustomGround() : RaycastCollidersArray(*this)
 	QuadComponent = CreateDefaultSubobject<UCustomQuadComponent>(TEXT("Plane"));
 	QuadComponent->SetupAttachment(RootComponent);
 	QuadComponent->GetCollider().SetFlag(ECustomCollisionFlags::Static);
+
+	static ConstructorHelpers::FObjectFinder<UCustomShapeTemplateDataAsset> CustomShapeDataAsset(TEXT("CustomShapeTemplateDataAsset'/Game/TAC/CustomShapeTemplateDataAsset.CustomShapeTemplateDataAsset'"));
+	if (CustomShapeDataAsset.Object != nullptr)
+	{
+		QuadComponent->GetCustomTransform().Size = CustomShapeDataAsset.Object->GetLocationBounds();
+	}
+
+	Generate();
 }
 
 void ACustomGround::Generate()

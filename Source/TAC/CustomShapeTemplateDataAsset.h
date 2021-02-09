@@ -19,6 +19,7 @@ public:
 public:
 	float GetSphereRadius() const { return SphereRadius; }
 	float GetDragThreashold() const { return DragThreashold; }
+	const FVector2D& GetLocationBounds() const { return LocationBounds; }
 	
 	const FCustomCubeTransform& GetCustomTransform() const { return CustomTransform; }
 
@@ -43,6 +44,9 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "CustomShapeActor|Sphere values")
 	float DragThreashold;
+
+	UPROPERTY(EditAnywhere, Category = "CustomShapeActor|Sphere values")
+	FVector2D LocationBounds;
 
 	UPROPERTY(EditAnywhere, Category = "TableComponent|Custom transform")
 	FCustomCubeTransform CustomTransform;

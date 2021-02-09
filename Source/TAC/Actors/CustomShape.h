@@ -64,6 +64,8 @@ private:
 	UFUNCTION()
 	void OnBottomLeftSphereHit(const FVector& HitPoint);
 
+	bool IsBetweenLocationBounds(const FCustomBoxCollider& BoxCollider) const;
+
 	void ShowDebugBoxCollider(const FCustomBoxCollider& BoxCollider, const FColor& Color) const;
 
 private:

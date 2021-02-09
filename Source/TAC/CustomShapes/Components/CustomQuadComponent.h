@@ -24,8 +24,8 @@ public:
 	void GenerateCollider(const FVector& Location, const FVector2D& Size);
 
 public:
-	const FCustomQuadTransform& GetTransform() const { return CustomTransform; }
-	FCustomQuadTransform& GetTransform() { return CustomTransform; }
+	const FCustomQuadTransform& GetCustomTransform() const { return CustomTransform; }
+	FCustomQuadTransform& GetCustomTransform() { return CustomTransform; }
 
 	const FCustomBoxCollider& GetCollider() const { return CustomBoxCollider; }
 	FCustomBoxCollider& GetCollider() { return CustomBoxCollider; }
