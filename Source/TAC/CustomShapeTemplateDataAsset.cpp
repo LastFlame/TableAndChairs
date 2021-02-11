@@ -24,5 +24,5 @@ UCustomShapeTemplateDataAsset::UCustomShapeTemplateDataAsset() :
 	DefaultTableBoundCollider.SetMinBounds((MinStartLocation + FVector::BackwardVector * DistanceFromMidToFrontBackRestChair)
 		+ FVector::LeftVector * DistanceFromtMidToRightBackRestChair);
 
-	DefaultTableBoundCollider.SetFlag(ECustomCollisionFlags::Dynamic);
+	DefaultTableBoundCollider.SetFlag(ETACCollisionFlags::Dynamic);
 }

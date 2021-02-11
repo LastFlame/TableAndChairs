@@ -5,8 +5,8 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "TAC/CustomShapes/CustomShapesTypes.h"
-#include "TAC/CustomCollisions/CustomColliders.h"
 #include "TAC/CustomShapes/Components/CustomTableComponent.h"
+#include "TACCollisionSystemModule/Public/TACColliders.h"
 #include "CustomShape.generated.h"
 
 class USceneComponent;
@@ -14,7 +14,7 @@ class UCustomSphereComponent;
 class UCustomShapeTemplateDataAsset;
 
 UCLASS()
-class TAC_API ACustomShape : public AActor, public ICustomHittable
+class TAC_API ACustomShape : public AActor, public ITACHittable
 {
 	GENERATED_BODY()
 
@@ -27,7 +27,7 @@ public:
 	UFUNCTION(CallInEditor, Category = "Debug")
 	void Generate();
 
-	bool Drag(const FCustomBaseCollider& Collider, const FVector& DragLocation);
+	bool Drag(const FTACBaseCollider& Collider, const FVector& DragLocation);
 	bool DragEdge(const FVector& ForwardDir, const FVector& RightDir, const FVector& DragDir, float ForwardDragDistance, float RightDragDistance);
 
 	bool Move(const FVector& Location);
@@ -36,14 +36,17 @@ public:
 
 public:
 	/* ICustomRaycastHittable interface */
-	virtual const FCustomBaseCollider& GetBoundCollider() const { return TableComponent->GetCollider();  }
-	virtual const CustomCollidersArray& GetColliders() const override { return RaycastCollidersArray; }
+	virtual const FTACBaseCollider& GetBoundCollider() const { return TableComponent->GetCollider();  }
+	virtual const TACCollidersArray& GetColliders() const override { return RaycastCollidersArray; }
 	/***********************************/
 
 public:
 	const FCustomCubeTransform& GetCustomTransform() const { return TableComponent->GetTransform(); }
 	FCustomCubeTransform& GetCustomTransform() { return TableComponent->GetTransform(); }
 	void SetCustomLocation(float X, float Y) { TableComponent->GetTransform().Location.X = X; TableComponent->GetTransform().Location.Y = Y; }
+
+protected:
+	virtual void BeginPlay() override;
 
 private:
 	UFUNCTION()
@@ -64,9 +67,9 @@ private:
 	UFUNCTION()
 	void OnBottomLeftSphereHit(const FVector& HitPoint);
 
-	bool IsBetweenLocationBounds(const FCustomBoxCollider& BoxCollider) const;
+	bool IsBetweenLocationBounds(const FTACBoxCollider& BoxCollider) const;
 
-	void ShowDebugBoxCollider(const FCustomBoxCollider& BoxCollider, const FColor& Color) const;
+	void ShowDebugBoxCollider(const FTACBoxCollider& BoxCollider, const FColor& Color) const;
 
 private:
 	UPROPERTY(EditAnywhere, Category = "Components")
@@ -108,5 +111,5 @@ private:
 	UPROPERTY()
 	UCustomSphereComponent* PrevHitSphere;
 
-	CustomCollidersArray RaycastCollidersArray;
+	TACCollidersArray RaycastCollidersArray;
 };

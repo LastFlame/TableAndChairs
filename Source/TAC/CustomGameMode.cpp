@@ -2,9 +2,8 @@
 
 
 #include "CustomGameMode.h"
-#include "TAC/CustomCollisions/CustomCollisionSystemContainer.h"
-#include "TAC/CustomCollisions/CustomCollisionSystem.h"
 #include "TAC/CustomShapeTemplateDataAsset.h"
+#include "TACCollisionSystemModule/Public/TACCollisionSystem.h"
 
 ACustomGameMode::ACustomGameMode(const FObjectInitializer& ObjectInitializer)
 {
@@ -19,13 +18,4 @@ ACustomGameMode::ACustomGameMode(const FObjectInitializer& ObjectInitializer)
 	{
 		CustomShapeTemplateData = CustomShapeDataAsset.Object;
 	}
-}
-
-void ACustomGameMode::InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage)
-{
-	Super::InitGame(MapName, Options, ErrorMessage);
-
-	CustomRaycastSystemContainer = NewObject<UCustomCollisionSystemContainer>();
-	CustomRaycastSystemContainer->Init(GetWorld());
-	CustomCollisionSystem::Init(CustomRaycastSystemContainer);
 }

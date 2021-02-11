@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "Engine/DataAsset.h"
 #include "TAC/CustomShapes/CustomShapesTypes.h"
-#include "TAC/CustomCollisions/CustomColliders.h"
+#include "TACCollisionSystemModule/Public/TACColliders.h"
 #include "CustomShapeTemplateDataAsset.generated.h"
 
 UCLASS()
@@ -23,8 +23,8 @@ public:
 	
 	const FCustomCubeTransform& GetCustomTransform() const { return CustomTransform; }
 
-	const FCustomBoxCollider& GetCustomBoxCollider() const { return CustomBoxCollider; }
-	const FCustomBoxCollider& GetDefaultTableBoundCollider() const { return DefaultTableBoundCollider; }
+	const FTACBoxCollider& GetCustomBoxCollider() const { return CustomBoxCollider; }
+	const FTACBoxCollider& GetDefaultTableBoundCollider() const { return DefaultTableBoundCollider; }
 	float GetColliderMaxBoundOffset() const { return ColliderMaxBoundOffset; }
 
 	const FVector2D& GetTableLegsSize() const { return TableLegsSize; }
@@ -52,10 +52,10 @@ private:
 	FCustomCubeTransform CustomTransform;
 
 	UPROPERTY(EditAnywhere, Category = "TableComponent|Custom colliders")
-	FCustomBoxCollider CustomBoxCollider;
+	FTACBoxCollider CustomBoxCollider;
 
 	UPROPERTY(VisibleAnywhere, Category = "TableComponent|Custom colliders")
-	FCustomBoxCollider DefaultTableBoundCollider;
+	FTACBoxCollider DefaultTableBoundCollider;
 
 	UPROPERTY(EditAnywhere, Category = "TableComponent|Custom colliders")
 	float ColliderMaxBoundOffset;

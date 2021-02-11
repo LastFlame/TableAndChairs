@@ -5,13 +5,13 @@
 #include "CoreMinimal.h"
 #include "UObject/Interface.h"
 #include "UObject/WeakInterfacePtr.h"
-#include "CustomColliders.generated.h"
+#include "TACColliders.generated.h"
 
-DECLARE_MULTICAST_DELEGATE_OneParam(FCustomOnLineTraceHitSignature, const FVector&);
-DECLARE_MULTICAST_DELEGATE(FCustomOnLineTraceHitChangedSignature);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnTACLineTraceHitSignature, const FVector&);
+DECLARE_MULTICAST_DELEGATE(FOnTACLineTraceHitChangedSignature);
 
 UENUM(Meta = (Bitflags))
-enum class ECustomCollisionFlags
+enum class ETACCollisionFlags
 {
 	Ignore,
 	Static,
@@ -21,81 +21,81 @@ enum class ECustomCollisionFlags
 #define ENUM_TO_BIT(Enum) (1 << static_cast<uint8>(Enum))
 #define COMPARE_ENUMS(EnumA, EnumB) ( (ENUM_TO_BIT(EnumA) & ENUM_TO_BIT(EnumB)) > 0) 
 
-class CustomCollidersArray
+class TACCOLLISIONSYSTEMMODULE_API TACCollidersArray
 {
 public:
-	CustomCollidersArray() {};
-	CustomCollidersArray(class ICustomHittable& Owner);
+	TACCollidersArray() {};
+	TACCollidersArray(class ITACHittable& Owner);
 
 public:
-	void Add(struct FCustomBaseCollider& Element);
+	void Add(struct FTACBaseCollider& Element);
 	void RemoveAt(int32_t Idx);
 
 public:
-	const TArray<struct FCustomBaseCollider*>& GetArray() const { return RaycastCollidersArray; }
+	const TArray<struct FTACBaseCollider*>& GetArray() const { return RaycastCollidersArray; }
 
 protected:
-	TWeakInterfacePtr<class ICustomHittable> Owner;
-	TArray<struct FCustomBaseCollider*> RaycastCollidersArray;
+	TWeakInterfacePtr<class ITACHittable> Owner;
+	TArray<struct FTACBaseCollider*> RaycastCollidersArray;
 };
 
 UINTERFACE(MinimalAPI)
-class UCustomHittable : public UInterface
+class  UTACHittable : public UInterface
 {
 	GENERATED_BODY()
 };
 
-class TAC_API ICustomHittable
+class TACCOLLISIONSYSTEMMODULE_API ITACHittable
 {
 	GENERATED_BODY()
 
 public:
-	virtual const FCustomBaseCollider& GetBoundCollider() const = 0;
-	virtual const class CustomCollidersArray& GetColliders() const = 0;
+	virtual const FTACBaseCollider& GetBoundCollider() const = 0;
+	virtual const class TACCollidersArray& GetColliders() const = 0;
 };
 
 USTRUCT()
-struct TAC_API FCustomBaseCollider
+struct TACCOLLISIONSYSTEMMODULE_API FTACBaseCollider
 {
 	GENERATED_USTRUCT_BODY()
 
 public:
-	FCustomBaseCollider() {}
-	virtual ~FCustomBaseCollider() { }
+	FTACBaseCollider() {}
+	virtual ~FTACBaseCollider() { }
 
 public:
 	virtual bool HasBeenHit(const FVector& Origin, const FVector& Direction, FVector& OutHitPoint) const { return false; }
-	virtual bool HasBeenHit(const struct FCustomBoxCollider& Box) const { return false; }
+	virtual bool HasBeenHit(const struct FTACBoxCollider& Box) const { return false; }
 
 public:
-	FCustomOnLineTraceHitSignature OnLineTraceHit;
-	FCustomOnLineTraceHitChangedSignature OnLineTraceHitChanged;
+	FOnTACLineTraceHitSignature OnLineTraceHit;
+	FOnTACLineTraceHitChangedSignature OnLineTraceHitChanged;
 
 	const FVector& GetLocation() const { return Location; }
 	void SetLocation(const FVector& NewLocation) { Location = NewLocation; }
 
-	ECustomCollisionFlags GetFlag() const { return CollisionFlag; }
-	ECustomCollisionFlags GetFlag() { return CollisionFlag; }
-	void SetFlag(ECustomCollisionFlags NewFlag) { CollisionFlag = NewFlag; }
+	ETACCollisionFlags GetFlag() const { return CollisionFlag; }
+	ETACCollisionFlags GetFlag() { return CollisionFlag; }
+	void SetFlag(ETACCollisionFlags NewFlag) { CollisionFlag = NewFlag; }
 
-	const TWeakInterfacePtr<ICustomHittable> GetHittableActor() const { return HittableActor; }
-	TWeakInterfacePtr<ICustomHittable> GetHittableActor() { return HittableActor; }
-	void SetHittableActor(ICustomHittable& NewHittableActor) { HittableActor = NewHittableActor; }
+	const TWeakInterfacePtr<ITACHittable> GetHittableActor() const { return HittableActor; }
+	TWeakInterfacePtr<ITACHittable> GetHittableActor() { return HittableActor; }
+	void SetHittableActor(ITACHittable& NewHittableActor) { HittableActor = NewHittableActor; }
 
 protected:
 	UPROPERTY(EditAnywhere)
 	FVector Location;
 
 	UPROPERTY(EditAnywhere)
-	ECustomCollisionFlags CollisionFlag;
+	ETACCollisionFlags CollisionFlag;
 
-	TWeakInterfacePtr<ICustomHittable> HittableActor;
+	TWeakInterfacePtr<ITACHittable> HittableActor;
 
-	friend class CustomCollidersArray;
+	friend class TACCollidersArray;
 };
 
 USTRUCT()
-struct FCustomSphereCollider : public FCustomBaseCollider
+struct TACCOLLISIONSYSTEMMODULE_API FTACSphereCollider : public FTACBaseCollider
 {
 	GENERATED_USTRUCT_BODY()
 
@@ -110,12 +110,12 @@ protected:
 };
 
 USTRUCT()
-struct FCustomBoxCollider : public FCustomBaseCollider
+struct TACCOLLISIONSYSTEMMODULE_API FTACBoxCollider : public FTACBaseCollider
 {
 	GENERATED_USTRUCT_BODY()
 
 	virtual bool HasBeenHit(const FVector& Origin, const FVector& Direction, FVector& OutHitPoint) const override;
-	virtual bool HasBeenHit(const FCustomBoxCollider& Box) const override;
+	virtual bool HasBeenHit(const FTACBoxCollider& Box) const override;
 
 	const FVector& GetMinBounds() const { return MinBounds; }
 	void SetMinBounds(const FVector& NewMinBounds) { MinBounds = NewMinBounds; }
@@ -132,7 +132,7 @@ protected:
 };
 
 USTRUCT()
-struct FCustomPlaneCollider : public FCustomBaseCollider
+struct TACCOLLISIONSYSTEMMODULE_API FTACPlaneCollider : public FTACBaseCollider
 {
 	GENERATED_USTRUCT_BODY()
 

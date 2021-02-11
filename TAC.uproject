@@ -13,7 +13,16 @@
 				"Engine",
 				"CoreUObject"
 			]
-		}
+		},
+		{
+			"Name": "TACCollisionSystemModule",
+			"Type": "Runtime",
+			"LoadingPhase": "Default",
+			"AdditionalDependencies": [
+				"Engine",
+				"CoreUObject"
+			]
+		}		
 	],
 	"Plugins": [
 		{

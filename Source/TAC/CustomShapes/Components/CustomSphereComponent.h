@@ -3,8 +3,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "TAC/CustomCollisions/CustomColliders.h"
 #include "TAC/CustomShapes/CustomShapesTypes.h"
+#include "TACCollisionSystemModule/Public/TACColliders.h"
 #include "CustomSphereComponent.generated.h"
 
 UCLASS(hideCategories = "ProceduralMesh")
@@ -24,15 +24,15 @@ public:
 	const FCustomSphereTransform& GetTransform() const { return CustomTransform; }
 	FCustomSphereTransform& GetTransform() { return CustomTransform; }
 
-	const FCustomSphereCollider& GetCollider() const { return CustomSphereCollider; }
-	FCustomSphereCollider& GetCollider() { return CustomSphereCollider; }
+	const FTACSphereCollider& GetCollider() const { return CustomSphereCollider; }
+	FTACSphereCollider& GetCollider() { return CustomSphereCollider; }
 
 private:
 	UPROPERTY(EditAnywhere, Category = "Custom transform")
 	FCustomSphereTransform CustomTransform;
 
 	UPROPERTY(VisibleAnywhere, Category = "Custom colliders")
-	FCustomSphereCollider CustomSphereCollider;
+	FTACSphereCollider CustomSphereCollider;
 
 	UPROPERTY()
 	FCustomShapeBuffers CustomShapeBuffers;

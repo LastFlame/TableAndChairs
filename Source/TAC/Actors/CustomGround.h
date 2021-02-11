@@ -4,13 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "TAC/CustomCollisions/CustomColliders.h"
 #include "TAC/CustomShapes/Components/CustomQuadComponent.h"
+#include "TACCollisionSystemModule/Public/TACColliders.h"
 
 #include "CustomGround.generated.h"
 
 UCLASS()
-class TAC_API ACustomGround : public AActor, public ICustomHittable
+class TAC_API ACustomGround : public AActor, public ITACHittable
 {
 	GENERATED_BODY()
 	
@@ -23,8 +23,8 @@ public:
 
 public:
 	/* ICustomRaycastHittable interface */
-	virtual const FCustomBaseCollider& GetBoundCollider() const override { return QuadComponent->GetCollider(); }
-	virtual const CustomCollidersArray& GetColliders() const override { return RaycastCollidersArray; }
+	virtual const FTACBaseCollider& GetBoundCollider() const override { return QuadComponent->GetCollider(); }
+	virtual const TACCollidersArray& GetColliders() const override { return RaycastCollidersArray; }
 	/***********************************/
 
 private:
@@ -34,5 +34,5 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Components")
 	UCustomQuadComponent* QuadComponent;
 
-	CustomCollidersArray RaycastCollidersArray;
+	TACCollidersArray RaycastCollidersArray;
 };

@@ -1,20 +1,20 @@
-#include "CustomColliders.h"
+#include "TACCollisionSystemModule/Public/TACColliders.h"
 
-CustomCollidersArray::CustomCollidersArray(ICustomHittable& Owner) : Owner(Owner) {}
+TACCollidersArray::TACCollidersArray(ITACHittable& Owner) : Owner(Owner) {}
 
-void CustomCollidersArray::Add(FCustomBaseCollider& Element)
+void TACCollidersArray::Add(FTACBaseCollider& Element)
 {
 	Element.HittableActor = Owner;
 	RaycastCollidersArray.Add(&Element);
 }
 
-void CustomCollidersArray::RemoveAt(int32_t Idx)
+void TACCollidersArray::RemoveAt(int32_t Idx)
 {
-	RaycastCollidersArray[Idx]->HittableActor = TWeakInterfacePtr<ICustomHittable>();
+	RaycastCollidersArray[Idx]->HittableActor = TWeakInterfacePtr<ITACHittable>();
 	RaycastCollidersArray.RemoveAt(Idx);
 }
 
-bool FCustomSphereCollider::HasBeenHit(const FVector& Origin, const FVector& Direction, FVector& OutHitPoint) const
+bool FTACSphereCollider::HasBeenHit(const FVector& Origin, const FVector& Direction, FVector& OutHitPoint) const
 {
 	const float DirectionSize = Direction.Size();
 
@@ -44,7 +44,7 @@ bool FCustomSphereCollider::HasBeenHit(const FVector& Origin, const FVector& Dir
 }
 
 
-bool FCustomBoxCollider::HasBeenHit(const FVector& Origin, const FVector& Direction, FVector& OutHitPoint) const
+bool FTACBoxCollider::HasBeenHit(const FVector& Origin, const FVector& Direction, FVector& OutHitPoint) const
 {
 	float TNear = -TNumericLimits<float>::Max();
 	float TFar = TNumericLimits<float>::Max();
@@ -97,7 +97,7 @@ bool FCustomBoxCollider::HasBeenHit(const FVector& Origin, const FVector& Direct
 }
 
 
-bool FCustomBoxCollider::HasBeenHit(const FCustomBoxCollider& Box) const
+bool FTACBoxCollider::HasBeenHit(const FTACBoxCollider& Box) const
 {
 	for (int i = 0; i < 3; ++i)
 	{
@@ -110,7 +110,7 @@ bool FCustomBoxCollider::HasBeenHit(const FCustomBoxCollider& Box) const
 	return true;
 }
 
-bool FCustomPlaneCollider::HasBeenHit(const FVector& Origin, const FVector& Direction, FVector& OutHitPoint) const
+bool FTACPlaneCollider::HasBeenHit(const FVector& Origin, const FVector& Direction, FVector& OutHitPoint) const
 {
 	constexpr float ParallelRayThreshold = 0.000015f;
 	constexpr float PointOnPlaneThreshold = 0.000015f;

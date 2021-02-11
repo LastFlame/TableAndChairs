@@ -6,7 +6,6 @@
 #include "GameFramework/GameModeBase.h"
 #include "CustomGameMode.generated.h"
 
-class UCustomCollisionSystemContainer;
 class UCustomShapeTemplateDataAsset;
 
 UCLASS()
@@ -16,15 +15,11 @@ class TAC_API ACustomGameMode : public AGameModeBase
 
 public:
 	ACustomGameMode(const FObjectInitializer& ObjectInitializer);	
-	virtual void InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage) override;
 
 public:
 	const UCustomShapeTemplateDataAsset& GetCustomShapeTemplateData() const { return *CustomShapeTemplateData; }
 
 private:
-	UPROPERTY();
-	UCustomCollisionSystemContainer* CustomRaycastSystemContainer;
-
 	UPROPERTY()
 	UCustomShapeTemplateDataAsset* CustomShapeTemplateData;
 };

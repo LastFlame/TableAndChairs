@@ -3,8 +3,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "TAC/CustomCollisions/CustomColliders.h"
 #include "TAC/CustomShapes/CustomShapesTypes.h"
+#include "TACCollisionSystemModule/Public/TACColliders.h"
 #include "CustomQuadComponent.generated.h"
 
 UCLASS(hideCategories = "ProceduralMesh", ClassGroup = Custom, meta = (BlueprintSpawnableComponent))
@@ -27,15 +27,15 @@ public:
 	const FCustomQuadTransform& GetCustomTransform() const { return CustomTransform; }
 	FCustomQuadTransform& GetCustomTransform() { return CustomTransform; }
 
-	const FCustomBoxCollider& GetCollider() const { return CustomBoxCollider; }
-	FCustomBoxCollider& GetCollider() { return CustomBoxCollider; }
+	const FTACBoxCollider& GetCollider() const { return CustomBoxCollider; }
+	FTACBoxCollider& GetCollider() { return CustomBoxCollider; }
 
 private:
 	UPROPERTY(EditAnywhere, Category = "Custom transform")
 	FCustomQuadTransform CustomTransform;
 
 	UPROPERTY(VisibleAnywhere, Category = "Custom colliders")
-	FCustomBoxCollider CustomBoxCollider;
+	FTACBoxCollider CustomBoxCollider;
 
 	UPROPERTY()
 	FCustomShapeBuffers CustomShapeBuffers;

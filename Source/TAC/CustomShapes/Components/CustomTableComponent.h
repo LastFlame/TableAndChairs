@@ -3,8 +3,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "TAC/CustomCollisions/CustomColliders.h"
 #include "TAC/CustomShapes/CustomShapesTypes.h"
+#include "TACCollisionSystemModule/Public/TACColliders.h"
 #include "CustomTableComponent.generated.h"
 
 class UCustomShapeTemplateDataAsset;
@@ -23,7 +23,7 @@ public:
 	FCustomCubeMeshData Draw();
 	FCustomCubeMeshData Draw(const FVector& Location);
 
-	bool CreateCollider(const FCustomCubeTransform& Transform, FCustomBoxCollider& OutBoxCollider) const;
+	bool CreateCollider(const FCustomCubeTransform& Transform, FTACBoxCollider& OutBoxCollider) const;
 	void GenerateCollider();
 	void GenerateCollider(const FVector& MinBounds, const FVector& MaxBounds);
 
@@ -44,8 +44,8 @@ public:
 	const FCustomCubeTransform& GetTransform() const { return CustomTransform; }
 	FCustomCubeTransform& GetTransform() { return CustomTransform; }
 
-	const FCustomBoxCollider& GetCollider() const { return CustomBoxCollider; }
-	FCustomBoxCollider& GetCollider() { return CustomBoxCollider; }
+	const FTACBoxCollider& GetCollider() const { return CustomBoxCollider; }
+	FTACBoxCollider& GetCollider() { return CustomBoxCollider; }
 
 	const FCustomShapeBuffers& GetCustomShapeBuffer() const { return CustomShapeBuffers; }
 
@@ -56,7 +56,7 @@ private:
 	FCustomCubeTransform CustomTransform;
 
 	UPROPERTY(VisibleAnywhere, Category = "Custom colliders")
-	FCustomBoxCollider CustomBoxCollider;
+	FTACBoxCollider CustomBoxCollider;
 
 	UPROPERTY(VisibleAnywhere, Category = "Custom colliders")
 	float ColliderMaxBoundOffset;

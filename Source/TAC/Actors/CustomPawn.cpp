@@ -3,18 +3,17 @@
 
 #include "CustomPawn.h"
 #include "GameFramework/PlayerInput.h"
+#include "GameFramework/FloatingPawnMovement.h"
+#include "DrawDebugHelpers.h"
+#include "Math/UnrealMathUtility.h"
 #include "CustomGround.h"
 #include "CustomShape.h"
-#include "DrawDebugHelpers.h"
-#include "TAC/CustomCollisions/CustomCollisionSystem.h"
-#include "GameFramework/FloatingPawnMovement.h"
-#include "TAC/CustomShapeTemplateDataAsset.h"
-#include "TAC/CustomGameMode.h"
-#include "Math/UnrealMathUtility.h"
-#include "GenericPlatform/GenericPlatformMath.h"
+#include "TACCollisionSystemModule/Public//TACCollisionSystem.h"
+
+static TWeakObjectPtr<UTACCollisionSystem> CollisionSystem;
 
 static TWeakObjectPtr<ACustomShape> DraggableActor;
-static FCustomBaseCollider* DraggableCollider = nullptr;
+static FTACBaseCollider* DraggableCollider = nullptr;
 
 static float X, Y;
 static float SavedMouseX, SavedMouseY;
@@ -42,6 +41,8 @@ void ACustomPawn::BeginPlay()
 	check(PlayerController);
 
 	PlayerController->bShowMouseCursor = !bRotating;
+
+	CollisionSystem = GetWorld()->GetSubsystem<UTACCollisionSystem>();
 }
 
 void ACustomPawn::AddControllerYawInput(float Val)
@@ -80,15 +81,13 @@ void ACustomPawn::ShootRaycast()
 {
 	FVector WorldLocation, WorldDirection;
 	PlayerController->DeprojectMousePositionToWorld(WorldLocation, WorldDirection);
-
-	CustomCollisionSystem::FCustomCollisionResult LinecastResult;
-
 	DrawDebugLine(GetWorld(), GetActorLocation(), GetActorLocation() + WorldDirection * 10000.0f, FColor::Green, false, 10.0f);
 
 	DraggableActor.Reset();
 	DraggableCollider = nullptr;
 
-	if (CustomCollisionSystem::LineTrace(WorldLocation, WorldDirection, LinecastResult))
+	FTACCollisionResult LinecastResult;
+	if (CollisionSystem->LineTrace(WorldLocation, WorldDirection, LinecastResult))
 	{
 		UObject* HitObject = LinecastResult.GetHitActor().GetObject();
 		UE_LOG(LogTemp, Warning, TEXT("HitActor = {%s}. Location = {%s}."), *HitObject->GetName(), *LinecastResult.GetHitPoint().ToString());

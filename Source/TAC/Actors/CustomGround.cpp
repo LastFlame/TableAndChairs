@@ -11,7 +11,7 @@ ACustomGround::ACustomGround() : RaycastCollidersArray(*this)
 
 	QuadComponent = CreateDefaultSubobject<UCustomQuadComponent>(TEXT("Plane"));
 	QuadComponent->SetupAttachment(RootComponent);
-	QuadComponent->GetCollider().SetFlag(ECustomCollisionFlags::Static);
+	QuadComponent->GetCollider().SetFlag(ETACCollisionFlags::Static);
 
 	static ConstructorHelpers::FObjectFinder<UCustomShapeTemplateDataAsset> CustomShapeDataAsset(TEXT("CustomShapeTemplateDataAsset'/Game/TAC/CustomShapeTemplateDataAsset.CustomShapeTemplateDataAsset'"));
 	if (CustomShapeDataAsset.Object != nullptr)

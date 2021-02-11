@@ -64,7 +64,7 @@ FCustomCubeMeshData UCustomTableComponent::Draw(const FVector& Location)
 	return Draw();
 }
 
-bool UCustomTableComponent::CreateCollider(const FCustomCubeTransform& Transform, FCustomBoxCollider& OutBoxCollider) const
+bool UCustomTableComponent::CreateCollider(const FCustomCubeTransform& Transform, FTACBoxCollider& OutBoxCollider) const
 {
 	FCustomCubeQuads* TableNormals = nullptr;
 

@@ -6,8 +6,10 @@
 #include "DrawDebugHelpers.h"
 #include "TAC/CustomShapes/CustomShapesRenderer.h"
 #include "TAC/CustomShapeTemplateDataAsset.h"
-#include "TAC/CustomCollisions/CustomCollisionSystem.h"
+#include "TACCollisionSystemModule/Public//TACCollisionSystem.h"
 #include "TAC/CustomGameMode.h"
+
+static TWeakObjectPtr<UTACCollisionSystem> CustomCollisionSystem;
 
 static bool IsLocationBetweenBounds(const FVector2D& LocationBounds, const FVector& MinLocation, const FVector& MaxLocation)
 {
@@ -22,23 +24,23 @@ ACustomShape::ACustomShape() : RaycastCollidersArray(*this)
 	
 	TableComponent = CreateDefaultSubobject<UCustomTableComponent>(TEXT("TableComponent"));
 	TableComponent->SetupAttachment(RootComponent);
-	TableComponent->GetCollider().SetFlag(ECustomCollisionFlags::Dynamic);
+	TableComponent->GetCollider().SetFlag(ETACCollisionFlags::Dynamic);
 
 	TopRightSphereComponent = CreateDefaultSubobject<UCustomSphereComponent>(TEXT("TopRightSphereComponent"));
 	TopRightSphereComponent->SetupAttachment(RootComponent);
-	TopRightSphereComponent->GetCollider().SetFlag(ECustomCollisionFlags::Dynamic);
+	TopRightSphereComponent->GetCollider().SetFlag(ETACCollisionFlags::Dynamic);
 
 	BottomRightSphereComponent = CreateDefaultSubobject<UCustomSphereComponent>(TEXT("BottomRightSphereComponent"));
 	BottomRightSphereComponent->SetupAttachment(RootComponent);
-	BottomRightSphereComponent->GetCollider().SetFlag(ECustomCollisionFlags::Dynamic);
+	BottomRightSphereComponent->GetCollider().SetFlag(ETACCollisionFlags::Dynamic);
 
 	TopLeftSphereComponent = CreateDefaultSubobject<UCustomSphereComponent>(TEXT("TopLeftSphereComponent"));
 	TopLeftSphereComponent->SetupAttachment(RootComponent);
-	TopLeftSphereComponent->GetCollider().SetFlag(ECustomCollisionFlags::Dynamic);
+	TopLeftSphereComponent->GetCollider().SetFlag(ETACCollisionFlags::Dynamic);
 
 	BottomLeftSphereComponent = CreateDefaultSubobject<UCustomSphereComponent>(TEXT("BottomLeftSphereComponent"));
 	BottomLeftSphereComponent->SetupAttachment(RootComponent);
-	BottomLeftSphereComponent->GetCollider().SetFlag(ECustomCollisionFlags::Dynamic);
+	BottomLeftSphereComponent->GetCollider().SetFlag(ETACCollisionFlags::Dynamic);
 
 	static ConstructorHelpers::FObjectFinder<UCustomShapeTemplateDataAsset> CustomShapeDataAsset(TEXT("CustomShapeTemplateDataAsset'/Game/TAC/CustomShapeTemplateDataAsset.CustomShapeTemplateDataAsset'"));
 	if (CustomShapeDataAsset.Object != nullptr)
@@ -90,9 +92,9 @@ void ACustomShape::Create(UWorld* World, const FVector& Location)
 	}
 
 	const UCustomShapeTemplateDataAsset& CustomShapeTemplateData = CustomGameMode->GetCustomShapeTemplateData();
-	const FCustomBoxCollider& TableDefaultBounds = CustomShapeTemplateData.GetDefaultTableBoundCollider();
+	const FTACBoxCollider& TableDefaultBounds = CustomShapeTemplateData.GetDefaultTableBoundCollider();
 
-	FCustomBoxCollider TableToSpawnCollider;
+	FTACBoxCollider TableToSpawnCollider;
 	TableToSpawnCollider.SetMinBounds(Location + TableDefaultBounds.GetMinBounds());
 	TableToSpawnCollider.SetMaxBounds(Location + TableDefaultBounds.GetMaxBounds());
 
@@ -101,8 +103,8 @@ void ACustomShape::Create(UWorld* World, const FVector& Location)
 		return;
 	}
 
-	CustomCollisionSystem::FCustomCollisionResult Result;
-	if (CustomCollisionSystem::BoxTrace(TableToSpawnCollider, ECustomCollisionFlags::Static, Result))
+	FTACCollisionResult Result;
+	if (World->GetSubsystem<UTACCollisionSystem>()->BoxTrace(TableToSpawnCollider, ETACCollisionFlags::Static, Result))
 	{
 		return;
 	}
@@ -133,14 +135,14 @@ void ACustomShape::Generate()
 	BottomLeftSphereComponent->GenerateCollider();
 }
 
-bool ACustomShape::Drag(const FCustomBaseCollider& Collider, const FVector& DragLocation)
+bool ACustomShape::Drag(const FTACBaseCollider& Collider, const FVector& DragLocation)
 {
 	if (TableComponent->GetCustomShapeBuffer().VertexBuffer.Num() == 0)
 	{
 		return false;
 	}
 
-	FCustomSphereCollider* SphereCollider = (FCustomSphereCollider*)&Collider;
+	FTACSphereCollider* SphereCollider = (FTACSphereCollider*)&Collider;
 	if (SphereCollider == nullptr)
 	{
 		return false;
@@ -214,22 +216,22 @@ bool ACustomShape::DragEdge(const FVector& ForwardDir, const FVector& RightDir, 
 			TableTransform.Size.X = TableSizeX;
 			TableTransform.Location.X -= ForwardDragDistance * (ForwardDotProd / ForwardDotProdAbs);
 
-			TableComponent->GetCollider().SetFlag(ECustomCollisionFlags::Static);
+			TableComponent->GetCollider().SetFlag(ETACCollisionFlags::Static);
 
-			FCustomBoxCollider BoxCollider;
+			FTACBoxCollider BoxCollider;
 			TableComponent->CreateCollider(TableTransform, BoxCollider);
 
 			//FlushPersistentDebugLines(GetWorld());
 			//ShowDebugBoxCollider(BoxCollider, FColor::Green);
 
-			CustomCollisionSystem::FCustomCollisionResult CollisionResult;
-			if (!CustomCollisionSystem::BoxTrace(BoxCollider, ECustomCollisionFlags::Static, CollisionResult) && IsBetweenLocationBounds(BoxCollider))
+			FTACCollisionResult CollisionResult;
+			if (!CustomCollisionSystem->BoxTrace(BoxCollider, ETACCollisionFlags::Static, CollisionResult) && IsBetweenLocationBounds(BoxCollider))
 			{
 				TableComponent->GetTransform() = TableTransform;
 				bDragged = true;
 			}
 
-			TableComponent->GetCollider().SetFlag(ECustomCollisionFlags::Dynamic);
+			TableComponent->GetCollider().SetFlag(ETACCollisionFlags::Dynamic);
 		}
 	}
 
@@ -243,21 +245,21 @@ bool ACustomShape::DragEdge(const FVector& ForwardDir, const FVector& RightDir, 
 			TableTransform.Size.Y = TableSizeY;
 			TableTransform.Location.Y -= RightDragDistance * (RightDotProd / RightDotProdAbs);
 
-			TableComponent->GetCollider().SetFlag(ECustomCollisionFlags::Static);
+			TableComponent->GetCollider().SetFlag(ETACCollisionFlags::Static);
 
-			FCustomBoxCollider BoxCollider;
+			FTACBoxCollider BoxCollider;
 			TableComponent->CreateCollider(TableTransform, BoxCollider);
 			//FlushPersistentDebugLines(GetWorld());
 			//ShowDebugBoxCollider(BoxCollider, FColor::Green);
 
-			CustomCollisionSystem::FCustomCollisionResult CollisionResult;
-			if (!CustomCollisionSystem::BoxTrace(BoxCollider, ECustomCollisionFlags::Static, CollisionResult) && IsBetweenLocationBounds(BoxCollider))
+			FTACCollisionResult CollisionResult;
+			if (!CustomCollisionSystem->BoxTrace(BoxCollider, ETACCollisionFlags::Static, CollisionResult) && IsBetweenLocationBounds(BoxCollider))
 			{
 				TableComponent->GetTransform() = TableTransform;
 				bDragged = true;
 			}
 
-			TableComponent->GetCollider().SetFlag(ECustomCollisionFlags::Dynamic);
+			TableComponent->GetCollider().SetFlag(ETACCollisionFlags::Dynamic);
 		}
 	}
 
@@ -266,25 +268,25 @@ bool ACustomShape::DragEdge(const FVector& ForwardDir, const FVector& RightDir, 
 
 bool ACustomShape::Move(const FVector& Location)
 {
-	FCustomBoxCollider BoxCollider;
+	FTACBoxCollider BoxCollider;
 
 	const FVector NewTableLocation = TableComponent->GetTransform().Location + Location;
 	BoxCollider.SetLocation(NewTableLocation);
 	
-	FCustomBoxCollider& TableCollider = TableComponent->GetCollider();
+	FTACBoxCollider& TableCollider = TableComponent->GetCollider();
 	const FVector NewMinBounds = TableCollider.GetMinBounds() + Location;
 	const FVector NewMaxBounds = TableCollider.GetMaxBounds() + Location;
 
 	BoxCollider.SetMinBounds(NewMinBounds);
 	BoxCollider.SetMaxBounds(NewMaxBounds);
 
-	BoxCollider.SetFlag(ECustomCollisionFlags::Static);
-	TableCollider.SetFlag(ECustomCollisionFlags::Static);
+	BoxCollider.SetFlag(ETACCollisionFlags::Static);
+	TableCollider.SetFlag(ETACCollisionFlags::Static);
 
-	CustomCollisionSystem::FCustomCollisionResult CollisionResult;
-	bool bCollisionSuccessul = CustomCollisionSystem::BoxTrace(BoxCollider, ECustomCollisionFlags::Static, CollisionResult);
+	FTACCollisionResult CollisionResult;
+	bool bCollisionSuccessul = CustomCollisionSystem->BoxTrace(BoxCollider, ETACCollisionFlags::Static, CollisionResult);
 
-	TableCollider.SetFlag(ECustomCollisionFlags::Dynamic);
+	TableCollider.SetFlag(ETACCollisionFlags::Dynamic);
 
 	if(bCollisionSuccessul)
 	{
@@ -307,6 +309,12 @@ void ACustomShape::ResetDraggableSphere()
 	{
 		PrevHitSphere->SetMaterial(0, nullptr);
 	}
+}
+
+void ACustomShape::BeginPlay()
+{
+	Super::BeginPlay();
+	CustomCollisionSystem = GetWorld()->GetSubsystem<UTACCollisionSystem>();
 }
 
 void ACustomShape::OnBoundColliderHit(const FVector& HitPoint)
@@ -352,12 +360,12 @@ void ACustomShape::OnBottomLeftSphereHit(const FVector& HitPoint)
 	PrevHitSphere = BottomLeftSphereComponent;
 }
 
-bool ACustomShape::IsBetweenLocationBounds(const FCustomBoxCollider& BoxCollider) const
+bool ACustomShape::IsBetweenLocationBounds(const FTACBoxCollider& BoxCollider) const
 {
 	return IsLocationBetweenBounds(CustomShapeTemplateData->GetLocationBounds(), BoxCollider.GetMinBounds(), BoxCollider.GetMaxBounds());
 }
 
-void ACustomShape::ShowDebugBoxCollider(const FCustomBoxCollider& BoxCollider, const FColor& Color) const
+void ACustomShape::ShowDebugBoxCollider(const FTACBoxCollider& BoxCollider, const FColor& Color) const
 {
 	if (TableComponent == nullptr)
 	{
