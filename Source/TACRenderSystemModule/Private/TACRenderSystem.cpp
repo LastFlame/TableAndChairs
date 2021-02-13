@@ -1,13 +1,13 @@
-#include "CustomShapesRenderer.h"
+#include "TACRenderSystemModule/Public/TACRenderSystem.h"
 
-namespace CustomShapesRenderer {
+namespace TACRender {
 
-	static FCustomShapeBuffers* CustomShapeBuffersTarget;
+	static FTACShapeBuffers* ShapeBuffersTarget;
 	static TWeakObjectPtr<UProceduralMeshComponent> ProceduralMeshComponentTarget;
 
-	void BeginScene(FCustomShapeBuffers& CustomShapeBuffers, UProceduralMeshComponent& ProceduralMeshComponent)
+	void BeginScene(FTACShapeBuffers& ShapeBuffers, UProceduralMeshComponent& ProceduralMeshComponent)
 	{
-		CustomShapeBuffersTarget = &CustomShapeBuffers;
+		ShapeBuffersTarget = &ShapeBuffers;
 		ProceduralMeshComponentTarget = &ProceduralMeshComponent;
 	}
 
@@ -21,17 +21,17 @@ namespace CustomShapesRenderer {
 		ProceduralMeshComponentTarget->CreateMeshSection
 		(
 			0,
-			CustomShapeBuffersTarget->VertexBuffer,
-			CustomShapeBuffersTarget->IndexBuffer,
-			CustomShapeBuffersTarget->NormalsBuffer,
-			CustomShapeBuffersTarget->UV0Buffer,
+			ShapeBuffersTarget->VertexBuffer,
+			ShapeBuffersTarget->IndexBuffer,
+			ShapeBuffersTarget->NormalsBuffer,
+			ShapeBuffersTarget->UV0Buffer,
 			TArray<FColor>(),
-			CustomShapeBuffersTarget->TangentsBuffer,
+			ShapeBuffersTarget->TangentsBuffer,
 			false
 		);
 	}
 
-	void AddQuadMesh(const FCustomQuadVertices& VerticesLocation, const FCustomQuadVertices& VerticesNormal)
+	void AddQuadMesh(const FTACQuadVertices& VerticesLocation, const FTACQuadVertices& VerticesNormal)
 	{
 		/*
 		*	QUAD VERTICES
@@ -45,43 +45,43 @@ namespace CustomShapesRenderer {
 		*/
 
 		// ASSIGN VERTICES LOCATION
-		CustomShapeBuffersTarget->VertexBuffer.Add(VerticesLocation.TopRight);
-		CustomShapeBuffersTarget->VertexBuffer.Add(VerticesLocation.BottomRight);
-		CustomShapeBuffersTarget->VertexBuffer.Add(VerticesLocation.TopLeft);
-		CustomShapeBuffersTarget->VertexBuffer.Add(VerticesLocation.BottomLeft);
+		ShapeBuffersTarget->VertexBuffer.Add(VerticesLocation.TopRight);
+		ShapeBuffersTarget->VertexBuffer.Add(VerticesLocation.BottomRight);
+		ShapeBuffersTarget->VertexBuffer.Add(VerticesLocation.TopLeft);
+		ShapeBuffersTarget->VertexBuffer.Add(VerticesLocation.BottomLeft);
 
 		// ASSIGN INDICES
-		int32& IndexBufferCounter = CustomShapeBuffersTarget->IndexBufferCounter;
+		int32& IndexBufferCounter = ShapeBuffersTarget->IndexBufferCounter;
 		const int32 TopRightIdx = IndexBufferCounter++;		//	0	
 		const int32 BottomRightIdx = IndexBufferCounter++;	//	1
 		const int32 TopLeftIdx = IndexBufferCounter++;		//	2	
 		const int32 BottomLeftIdx = IndexBufferCounter++;	//	3
 
-		CustomShapeBuffersTarget->IndexBuffer.Add(TopRightIdx);
-		CustomShapeBuffersTarget->IndexBuffer.Add(BottomRightIdx);
-		CustomShapeBuffersTarget->IndexBuffer.Add(TopLeftIdx);
+		ShapeBuffersTarget->IndexBuffer.Add(TopRightIdx);
+		ShapeBuffersTarget->IndexBuffer.Add(BottomRightIdx);
+		ShapeBuffersTarget->IndexBuffer.Add(TopLeftIdx);
 
-		CustomShapeBuffersTarget->IndexBuffer.Add(BottomLeftIdx);
-		CustomShapeBuffersTarget->IndexBuffer.Add(TopLeftIdx);
-		CustomShapeBuffersTarget->IndexBuffer.Add(BottomRightIdx);
+		ShapeBuffersTarget->IndexBuffer.Add(BottomLeftIdx);
+		ShapeBuffersTarget->IndexBuffer.Add(TopLeftIdx);
+		ShapeBuffersTarget->IndexBuffer.Add(BottomRightIdx);
 
 
 
 		// ASSIGN NORMALS
 
-		CustomShapeBuffersTarget->NormalsBuffer.Add(VerticesNormal.TopRight);
-		CustomShapeBuffersTarget->NormalsBuffer.Add(VerticesNormal.BottomRight);
-		CustomShapeBuffersTarget->NormalsBuffer.Add(VerticesNormal.TopLeft);
-		CustomShapeBuffersTarget->NormalsBuffer.Add(VerticesNormal.BottomLeft);
+		ShapeBuffersTarget->NormalsBuffer.Add(VerticesNormal.TopRight);
+		ShapeBuffersTarget->NormalsBuffer.Add(VerticesNormal.BottomRight);
+		ShapeBuffersTarget->NormalsBuffer.Add(VerticesNormal.TopLeft);
+		ShapeBuffersTarget->NormalsBuffer.Add(VerticesNormal.BottomLeft);
 
 		// ASSIGN TANGENTS
 		// Tangent parallel to the Y axis of UV map.
 		// Is the same for every vertex.
 		const FProcMeshTangent Tangent(0.0f, 1.0f, 0.0f);
-		CustomShapeBuffersTarget->TangentsBuffer.Add(Tangent);
-		CustomShapeBuffersTarget->TangentsBuffer.Add(Tangent);
-		CustomShapeBuffersTarget->TangentsBuffer.Add(Tangent);
-		CustomShapeBuffersTarget->TangentsBuffer.Add(Tangent);
+		ShapeBuffersTarget->TangentsBuffer.Add(Tangent);
+		ShapeBuffersTarget->TangentsBuffer.Add(Tangent);
+		ShapeBuffersTarget->TangentsBuffer.Add(Tangent);
+		ShapeBuffersTarget->TangentsBuffer.Add(Tangent);
 
 		// ASSIGN UV0
 		/*
@@ -94,13 +94,13 @@ namespace CustomShapesRenderer {
 		* UV00	+---------+ UV10
 		*	   v2        v4
 		*/
-		CustomShapeBuffersTarget->UV0Buffer.Add(FVector2D(1.0f, 1.0f)); // TR
-		CustomShapeBuffersTarget->UV0Buffer.Add(FVector2D(1.0f, 0.0f)); // BR
-		CustomShapeBuffersTarget->UV0Buffer.Add(FVector2D(0.0f, 1.0f)); // TL
-		CustomShapeBuffersTarget->UV0Buffer.Add(FVector2D(0.0f, 0.0f)); // BL
+		ShapeBuffersTarget->UV0Buffer.Add(FVector2D(1.0f, 1.0f)); // TR
+		ShapeBuffersTarget->UV0Buffer.Add(FVector2D(1.0f, 0.0f)); // BR
+		ShapeBuffersTarget->UV0Buffer.Add(FVector2D(0.0f, 1.0f)); // TL
+		ShapeBuffersTarget->UV0Buffer.Add(FVector2D(0.0f, 0.0f)); // BL
 	}
 
-	FORCEINLINE FCustomQuadVertices GetPlaneNormals(const FCustomQuadVertices& VerticesLocation)
+	FORCEINLINE FTACQuadVertices GetPlaneNormals(const FTACQuadVertices& VerticesLocation)
 	{
 		/*
 		*	Since the Quad is flat we calculate the normal once.
@@ -124,7 +124,7 @@ namespace CustomShapesRenderer {
 		return { CubeNormal , CubeNormal , CubeNormal , CubeNormal };
 	}
 
-	void AddCubeMesh(const FCustomCubeQuads& CubeData)
+	void AddCubeMesh(const FTACCubeQuads& CubeData)
 	{
 		AddQuadMesh(CubeData.FrontQuad, GetPlaneNormals(CubeData.FrontQuad));
 		AddQuadMesh(CubeData.LeftQuad, GetPlaneNormals(CubeData.LeftQuad));
@@ -134,7 +134,7 @@ namespace CustomShapesRenderer {
 		AddQuadMesh(CubeData.BottomQuad, GetPlaneNormals(CubeData.BottomQuad));
 	}
 
-	FORCEINLINE FVector ParametricEquation(float Radius, float Longitude, float Latitude)
+	FORCEINLINE FVector GetSphereVertexLocation(float Radius, float Longitude, float Latitude)
 	{
 		return FVector(
 			cos(Longitude) * sin(Latitude) * Radius,
@@ -142,7 +142,7 @@ namespace CustomShapesRenderer {
 			sin(Longitude) * sin(Latitude) * Radius);
 	}
 
-	FCustomQuadMeshData DrawQuad(const FCustomQuadTransform& PlaneTransform)
+	FTACQuadMeshData DrawQuad(const FTACQuadTransform& PlaneTransform)
 	{
 		const FVector& Offset = PlaneTransform.Location;
 		const FVector2D& VertexLocation = PlaneTransform.Size;
@@ -153,21 +153,21 @@ namespace CustomShapesRenderer {
 		const FVector TopLeft = Rotator.RotateVector({ 0.0f, -VertexLocation.X, VertexLocation.Y }) + Offset;
 		const FVector BottomLeft = Rotator.RotateVector({ 0.0f, -VertexLocation.X, -VertexLocation.Y }) + Offset;
 
-		const FCustomQuadVertices& QuadVertices = { TopRight, BottomRight, TopLeft, BottomLeft };
+		const FTACQuadVertices& QuadVertices = { TopRight, BottomRight, TopLeft, BottomLeft };
 
-		const int32_t ReturnCustomPlaneDataStartIdx = CustomShapeBuffersTarget->VertexBuffer.Num();
+		const int32_t ReturnCustomPlaneDataStartIdx = ShapeBuffersTarget->VertexBuffer.Num();
 
 
 		AddQuadMesh(QuadVertices, GetPlaneNormals(QuadVertices));
 
 		return
 		{
-			(FCustomQuadVertices*)(&CustomShapeBuffersTarget->VertexBuffer[ReturnCustomPlaneDataStartIdx]),
-			(FCustomQuadVertices*)(&CustomShapeBuffersTarget->NormalsBuffer[ReturnCustomPlaneDataStartIdx])
+			(FTACQuadVertices*)(&ShapeBuffersTarget->VertexBuffer[ReturnCustomPlaneDataStartIdx]),
+			(FTACQuadVertices*)(&ShapeBuffersTarget->NormalsBuffer[ReturnCustomPlaneDataStartIdx])
 		};
 	}
 
-	FCustomCubeMeshData DrawCube(const FCustomCubeTransform& CubeTransform)
+	FTACCubeMeshData DrawCube(const FTACCubeTransform& CubeTransform)
 	{
 		const FVector& Offset = CubeTransform.Location;
 		const FVector& VertexLocation = CubeTransform.Size;
@@ -184,7 +184,7 @@ namespace CustomShapesRenderer {
 		const FVector BackTopRight = Rotator.RotateVector({ -VertexLocation.X, VertexLocation.Y, VertexLocation.Z }) + Offset;
 		const FVector BackBottomRight = Rotator.RotateVector({ -VertexLocation.X, VertexLocation.Y, -VertexLocation.Z }) + Offset;
 
-		const int32_t ReturnCustomCubeDataStartIdx = CustomShapeBuffersTarget->VertexBuffer.Num();
+		const int32_t ReturnCustomCubeDataStartIdx = ShapeBuffersTarget->VertexBuffer.Num();
 
 		AddCubeMesh(
 		{
@@ -199,12 +199,12 @@ namespace CustomShapesRenderer {
 
 		return 
 		{ 
-			(FCustomCubeQuads*)(&CustomShapeBuffersTarget->VertexBuffer[ReturnCustomCubeDataStartIdx]),
-			(FCustomCubeQuads*)(&CustomShapeBuffersTarget->NormalsBuffer[ReturnCustomCubeDataStartIdx])
+			(FTACCubeQuads*)(&ShapeBuffersTarget->VertexBuffer[ReturnCustomCubeDataStartIdx]),
+			(FTACCubeQuads*)(&ShapeBuffersTarget->NormalsBuffer[ReturnCustomCubeDataStartIdx])
 		};
 	}
 
-	void DrawSphere(const FCustomSphereTransform& SphereTransform, int32 LongitudeSteps, int32 LatitudeSteps)
+	void DrawSphere(const FTACSphereTransform& SphereTransform, int32 LongitudeSteps, int32 LatitudeSteps)
 	{
 		const float StartLongitude = 0, StartLatitude = 0;
 		const float EndLongitude = PI * 2, EndLatitude = PI;
@@ -224,15 +224,15 @@ namespace CustomShapesRenderer {
 
 				const FRotator Rotator = SphereTransform.GetRotator();
 
-				const FCustomQuadVertices SphereQuads =
+				const FTACQuadVertices SphereQuads =
 				{
-					{ Rotator.RotateVector(ParametricEquation(SphereTransform.Radius, Longitude, Latitude))} ,
-					{ Rotator.RotateVector(ParametricEquation(SphereTransform.Radius, Longitude, LatitudeNext))},
-					{ Rotator.RotateVector(ParametricEquation(SphereTransform.Radius, LongitudeNext, Latitude))},
-					{ Rotator.RotateVector(ParametricEquation(SphereTransform.Radius, LongitudeNext, LatitudeNext))}
+					{ Rotator.RotateVector(GetSphereVertexLocation(SphereTransform.Radius, Longitude, Latitude))} ,
+					{ Rotator.RotateVector(GetSphereVertexLocation(SphereTransform.Radius, Longitude, LatitudeNext))},
+					{ Rotator.RotateVector(GetSphereVertexLocation(SphereTransform.Radius, LongitudeNext, Latitude))},
+					{ Rotator.RotateVector(GetSphereVertexLocation(SphereTransform.Radius, LongitudeNext, LatitudeNext))}
 				};
 
-				const FCustomQuadVertices VerticesLocation =
+				const FTACQuadVertices VerticesLocation =
 				{
 					SphereQuads.TopRight + SphereTransform.Location,
 					SphereQuads.BottomRight + SphereTransform.Location,
@@ -241,7 +241,7 @@ namespace CustomShapesRenderer {
 				};
 
 				// For spheres, the normal is just the normalized value of each vertex.
-				const FCustomQuadVertices VerticesNormals =
+				const FTACQuadVertices VerticesNormals =
 				{
 					SphereQuads.TopRight.GetSafeNormal(),
 					SphereQuads.BottomRight.GetSafeNormal(),

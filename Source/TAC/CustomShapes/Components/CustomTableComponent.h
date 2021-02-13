@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "TAC/CustomShapes/CustomShapesTypes.h"
+#include "TACRenderSystemModule/Public/TACRenderShapesTypes.h"
 #include "TACCollisionSystemModule/Public/TACColliders.h"
 #include "CustomTableComponent.generated.h"
 
@@ -20,40 +20,40 @@ public:
 public:
 	UFUNCTION(CallInEditor)
 	void DebugDraw();
-	FCustomCubeMeshData Draw();
-	FCustomCubeMeshData Draw(const FVector& Location);
+	FTACCubeMeshData Draw();
+	FTACCubeMeshData Draw(const FVector& Location);
 
-	bool CreateCollider(const FCustomCubeTransform& Transform, FTACBoxCollider& OutBoxCollider) const;
+	bool CreateCollider(const FTACCubeTransform& Transform, FTACBoxCollider& OutBoxCollider) const;
 	void GenerateCollider();
 	void GenerateCollider(const FVector& MinBounds, const FVector& MaxBounds);
 
 private:
-	FCustomCubeMeshData DrawTable(const FCustomCubeTransform& Transform, const FVector2D& LegsSize);
-	void DrawChairs(const FCustomCubeMeshData& TableCustomVertices);
+	FTACCubeMeshData DrawTable(const FTACCubeTransform& Transform, const FVector2D& LegsSize);
+	void DrawChairs(const FTACCubeMeshData& TableCustomVertices);
 	void DrawSequenceOfChairs(const FVector& TableRightCorner, const FVector& TableLeftCorner, const FVector& OffsetDirection, float Rotation);
 
-	FCustomCubeMeshData DrawChair(const FCustomCubeTransform& Transform);
+	FTACCubeMeshData DrawChair(const FTACCubeTransform& Transform);
 
-	FCustomCubeMeshData DrawFrontLeftLeg(const FCustomCubeTransform& Transform, const FCustomCubeMeshData& VerticesData, const FVector2D& LegsSize);
-	FCustomCubeMeshData DrawFrontRightLeg(const FCustomCubeTransform& Transform, const FCustomCubeMeshData& VerticesData, const FVector2D& LegsSize);
+	FTACCubeMeshData DrawFrontLeftLeg(const FTACCubeTransform& Transform, const FTACCubeMeshData& VerticesData, const FVector2D& LegsSize);
+	FTACCubeMeshData DrawFrontRightLeg(const FTACCubeTransform& Transform, const FTACCubeMeshData& VerticesData, const FVector2D& LegsSize);
 
-	FCustomCubeMeshData DrawBackLeftLeg(const FCustomCubeTransform& Transform, const FCustomCubeMeshData& VerticesData, const FVector2D& LegsSize);
-	FCustomCubeMeshData DrawBackRightLeg(const FCustomCubeTransform& Transform, const FCustomCubeMeshData& VerticesData, const FVector2D& LegsSize);
+	FTACCubeMeshData DrawBackLeftLeg(const FTACCubeTransform& Transform, const FTACCubeMeshData& VerticesData, const FVector2D& LegsSize);
+	FTACCubeMeshData DrawBackRightLeg(const FTACCubeTransform& Transform, const FTACCubeMeshData& VerticesData, const FVector2D& LegsSize);
 
 public:
-	const FCustomCubeTransform& GetTransform() const { return CustomTransform; }
-	FCustomCubeTransform& GetTransform() { return CustomTransform; }
+	const FTACCubeTransform& GetTransform() const { return CustomTransform; }
+	FTACCubeTransform& GetTransform() { return CustomTransform; }
 
 	const FTACBoxCollider& GetCollider() const { return CustomBoxCollider; }
 	FTACBoxCollider& GetCollider() { return CustomBoxCollider; }
 
-	const FCustomShapeBuffers& GetCustomShapeBuffer() const { return CustomShapeBuffers; }
+	const FTACShapeBuffers& GetCustomShapeBuffer() const { return CustomShapeBuffers; }
 
 	const FVector2D& GetTableMinSize() const { return TableMinSize; }
 
 private:
 	UPROPERTY(EditAnywhere, Category = "Custom transform")
-	FCustomCubeTransform CustomTransform;
+	FTACCubeTransform CustomTransform;
 
 	UPROPERTY(VisibleAnywhere, Category = "Custom colliders")
 	FTACBoxCollider CustomBoxCollider;
@@ -89,8 +89,8 @@ private:
 	UCustomShapeTemplateDataAsset* CustomShapeTemplateData;
 
 	UPROPERTY()
-	FCustomShapeBuffers CustomShapeBuffers;
+	FTACShapeBuffers CustomShapeBuffers;
 
-	FCustomCubeMeshData LastDrawnTable;
+	FTACCubeMeshData LastDrawnTable;
 };
 

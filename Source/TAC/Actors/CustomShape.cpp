@@ -4,7 +4,6 @@
 #include "CustomShape.h"
 #include "TAC/CustomShapes/Components/CustomSphereComponent.h"
 #include "DrawDebugHelpers.h"
-#include "TAC/CustomShapes/CustomShapesRenderer.h"
 #include "TAC/CustomShapeTemplateDataAsset.h"
 #include "TACCollisionSystemModule/Public//TACCollisionSystem.h"
 #include "TAC/CustomGameMode.h"
@@ -118,7 +117,7 @@ void ACustomShape::Generate()
 {
 	FlushPersistentDebugLines(GetWorld());
 
-	FCustomCubeMeshData Table = TableComponent->Draw();
+	FTACCubeMeshData Table = TableComponent->Draw();
 	TableComponent->GenerateCollider();
 	ShowDebugBoxCollider(TableComponent->GetCollider(), FColor::Red);
 
@@ -153,10 +152,10 @@ bool ACustomShape::Drag(const FTACBaseCollider& Collider, const FVector& DragLoc
 		return false;
 	}
 
-	FCustomCubeMeshData Table =
+	FTACCubeMeshData Table =
 	{
-		(FCustomCubeQuads*)(&TableComponent->GetCustomShapeBuffer().VertexBuffer[0]),
-		(FCustomCubeQuads*)(&TableComponent->GetCustomShapeBuffer().NormalsBuffer[0])
+		(FTACCubeQuads*)(&TableComponent->GetCustomShapeBuffer().VertexBuffer[0]),
+		(FTACCubeQuads*)(&TableComponent->GetCustomShapeBuffer().NormalsBuffer[0])
 	};
 
 	FVector DragDir = (DragLocation - Collider.GetLocation()).GetSafeNormal();
@@ -212,7 +211,7 @@ bool ACustomShape::DragEdge(const FVector& ForwardDir, const FVector& RightDir, 
 
 		if (TableSizeX >= TableComponent->GetTableMinSize().X)
 		{
-			FCustomCubeTransform TableTransform = TableComponent->GetTransform();
+			FTACCubeTransform TableTransform = TableComponent->GetTransform();
 			TableTransform.Size.X = TableSizeX;
 			TableTransform.Location.X -= ForwardDragDistance * (ForwardDotProd / ForwardDotProdAbs);
 
@@ -241,7 +240,7 @@ bool ACustomShape::DragEdge(const FVector& ForwardDir, const FVector& RightDir, 
 
 		if (TableSizeY >= TableComponent->GetTableMinSize().Y)
 		{
-			FCustomCubeTransform TableTransform = TableComponent->GetTransform();
+			FTACCubeTransform TableTransform = TableComponent->GetTransform();
 			TableTransform.Size.Y = TableSizeY;
 			TableTransform.Location.Y -= RightDragDistance * (RightDotProd / RightDotProdAbs);
 

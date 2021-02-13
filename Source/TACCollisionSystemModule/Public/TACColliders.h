@@ -60,7 +60,7 @@ struct TACCOLLISIONSYSTEMMODULE_API FTACBaseCollider
 	GENERATED_USTRUCT_BODY()
 
 public:
-	FTACBaseCollider() {}
+	FTACBaseCollider() : Location(0.0f, 0.0f, 0.0f), CollisionFlag(ETACCollisionFlags::Ignore) {}
 	virtual ~FTACBaseCollider() { }
 
 public:

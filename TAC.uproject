@@ -22,7 +22,16 @@
 				"Engine",
 				"CoreUObject"
 			]
-		}		
+		},
+		{
+			"Name": "TACRenderSystemModule",
+			"Type": "Runtime",
+			"LoadingPhase": "Default",
+			"AdditionalDependencies": [
+				"Engine",
+				"CoreUObject"
+			]
+		}			
 	],
 	"Plugins": [
 		{

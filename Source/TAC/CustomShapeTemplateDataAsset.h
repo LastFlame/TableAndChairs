@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Engine/DataAsset.h"
-#include "TAC/CustomShapes/CustomShapesTypes.h"
+#include "TACRenderSystemModule/Public/TACRenderShapesTypes.h"
 #include "TACCollisionSystemModule/Public/TACColliders.h"
 #include "CustomShapeTemplateDataAsset.generated.h"
 
@@ -21,7 +21,7 @@ public:
 	float GetDragThreashold() const { return DragThreashold; }
 	const FVector2D& GetLocationBounds() const { return LocationBounds; }
 	
-	const FCustomCubeTransform& GetCustomTransform() const { return CustomTransform; }
+	const FTACCubeTransform& GetCustomTransform() const { return CustomTransform; }
 
 	const FTACBoxCollider& GetCustomBoxCollider() const { return CustomBoxCollider; }
 	const FTACBoxCollider& GetDefaultTableBoundCollider() const { return DefaultTableBoundCollider; }
@@ -49,7 +49,7 @@ private:
 	FVector2D LocationBounds;
 
 	UPROPERTY(EditAnywhere, Category = "TableComponent|Custom transform")
-	FCustomCubeTransform CustomTransform;
+	FTACCubeTransform CustomTransform;
 
 	UPROPERTY(EditAnywhere, Category = "TableComponent|Custom colliders")
 	FTACBoxCollider CustomBoxCollider;

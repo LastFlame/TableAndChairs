@@ -2,15 +2,15 @@
 
 using UnrealBuildTool;
 
-public class TAC : ModuleRules
+public class TACRenderSystemModule : ModuleRules
 {
-	public TAC(ReadOnlyTargetRules Target) : base(Target)
+	public TACRenderSystemModule(ReadOnlyTargetRules Target) : base(Target)
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 	
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore"});
+		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore" });
 
-		PrivateDependencyModuleNames.AddRange(new string[] {"ProceduralMeshComponent", "TACCollisionSystemModule", "TACRenderSystemModule"});
+		PrivateDependencyModuleNames.AddRange(new string[] { "ProceduralMeshComponent" });
 
 		// Uncomment if you are using Slate UI
 		// PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore" });

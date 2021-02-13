@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "TAC/CustomShapes/CustomShapesTypes.h"
+#include "TACRenderSystemModule/Public/TACRenderShapesTypes.h"
 #include "TACCollisionSystemModule/Public/TACColliders.h"
 #include "CustomQuadComponent.generated.h"
 
@@ -24,19 +24,19 @@ public:
 	void GenerateCollider(const FVector& Location, const FVector2D& Size);
 
 public:
-	const FCustomQuadTransform& GetCustomTransform() const { return CustomTransform; }
-	FCustomQuadTransform& GetCustomTransform() { return CustomTransform; }
+	const FTACQuadTransform& GetCustomTransform() const { return CustomTransform; }
+	FTACQuadTransform& GetCustomTransform() { return CustomTransform; }
 
 	const FTACBoxCollider& GetCollider() const { return CustomBoxCollider; }
 	FTACBoxCollider& GetCollider() { return CustomBoxCollider; }
 
 private:
 	UPROPERTY(EditAnywhere, Category = "Custom transform")
-	FCustomQuadTransform CustomTransform;
+	FTACQuadTransform CustomTransform;
 
 	UPROPERTY(VisibleAnywhere, Category = "Custom colliders")
 	FTACBoxCollider CustomBoxCollider;
 
 	UPROPERTY()
-	FCustomShapeBuffers CustomShapeBuffers;
+	FTACShapeBuffers CustomShapeBuffers;
 };

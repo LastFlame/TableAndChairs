@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "TAC/CustomShapes/CustomShapesTypes.h"
 #include "TAC/CustomShapes/Components/CustomTableComponent.h"
 #include "TACCollisionSystemModule/Public/TACColliders.h"
 #include "CustomShape.generated.h"
@@ -41,8 +40,8 @@ public:
 	/***********************************/
 
 public:
-	const FCustomCubeTransform& GetCustomTransform() const { return TableComponent->GetTransform(); }
-	FCustomCubeTransform& GetCustomTransform() { return TableComponent->GetTransform(); }
+	const FTACCubeTransform& GetCustomTransform() const { return TableComponent->GetTransform(); }
+	FTACCubeTransform& GetCustomTransform() { return TableComponent->GetTransform(); }
 	void SetCustomLocation(float X, float Y) { TableComponent->GetTransform().Location.X = X; TableComponent->GetTransform().Location.Y = Y; }
 
 protected:

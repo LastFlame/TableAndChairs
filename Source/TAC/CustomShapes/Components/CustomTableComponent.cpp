@@ -2,7 +2,7 @@
 
 
 #include "CustomTableComponent.h"
-#include "TAC/CustomShapes/CustomShapesRenderer.h"
+#include "TACRenderSystemModule/Public/TACRenderSystem.h"
 #include "GenericPlatform/GenericPlatformMath.h"
 #include "TAC/CustomShapeTemplateDataAsset.h"
 
@@ -39,7 +39,7 @@ void UCustomTableComponent::DebugDraw()
 	Draw();
 }
 
-FCustomCubeMeshData UCustomTableComponent::Draw()
+FTACCubeMeshData UCustomTableComponent::Draw()
 {
 	// Prevents the table size from becoming negative and containing less than 1 chair.
 	CustomTransform.Size.X = FGenericPlatformMath::Max(CustomTransform.Size.X, TableMinSize.X);
@@ -48,25 +48,25 @@ FCustomCubeMeshData UCustomTableComponent::Draw()
 	CustomShapeBuffers.Reset();
 	LastDrawnTable.Normals = nullptr;
 
-	CustomShapesRenderer::BeginScene(CustomShapeBuffers, *this);
+	TACRender::BeginScene(CustomShapeBuffers, *this);
 	{
 		LastDrawnTable = DrawTable(CustomTransform, TableLegsSize);
 		DrawChairs(LastDrawnTable);
 	}
-	CustomShapesRenderer::EndScene();
+	TACRender::EndScene();
 
 	return LastDrawnTable;
 }
 
-FCustomCubeMeshData UCustomTableComponent::Draw(const FVector& Location)
+FTACCubeMeshData UCustomTableComponent::Draw(const FVector& Location)
 {
 	CustomTransform.Location = Location;
 	return Draw();
 }
 
-bool UCustomTableComponent::CreateCollider(const FCustomCubeTransform& Transform, FTACBoxCollider& OutBoxCollider) const
+bool UCustomTableComponent::CreateCollider(const FTACCubeTransform& Transform, FTACBoxCollider& OutBoxCollider) const
 {
-	FCustomCubeQuads* TableNormals = nullptr;
+	FTACCubeQuads* TableNormals = nullptr;
 
 	if (LastDrawnTable.Normals != nullptr)
 	{
@@ -74,7 +74,7 @@ bool UCustomTableComponent::CreateCollider(const FCustomCubeTransform& Transform
 	}
 	else if (CustomShapeBuffers.NormalsBuffer.Num() != 0) // Fallback in case the mesh as been drawn but LastDrawnTable is null.
 	{
-		TableNormals = (FCustomCubeQuads*)(&CustomShapeBuffers.NormalsBuffer[0]); // Mimic the return value of CustomShapesRenderer::DrawCube().
+		TableNormals = (FTACCubeQuads*)(&CustomShapeBuffers.NormalsBuffer[0]); // Mimic the return value of CustomShapesRenderer::DrawCube().
 	}
 
 	if (TableNormals == nullptr)
@@ -108,7 +108,7 @@ bool UCustomTableComponent::CreateCollider(const FCustomCubeTransform& Transform
 
 void UCustomTableComponent::GenerateCollider()
 {
-	FCustomCubeQuads* TableNormals = nullptr;
+	FTACCubeQuads* TableNormals = nullptr;
 
 	if (LastDrawnTable.Normals != nullptr)
 	{
@@ -116,7 +116,7 @@ void UCustomTableComponent::GenerateCollider()
 	}
 	else if (CustomShapeBuffers.NormalsBuffer.Num() != 0) // Fallback in case the mesh as been drawn but LastDrawnTable is null.
 	{
-		TableNormals = (FCustomCubeQuads*)(&CustomShapeBuffers.NormalsBuffer[0]); // Mimic the return value of CustomShapesRenderer::DrawCube().
+		TableNormals = (FTACCubeQuads*)(&CustomShapeBuffers.NormalsBuffer[0]); // Mimic the return value of CustomShapesRenderer::DrawCube().
 	}
 
 	if (TableNormals == nullptr)
@@ -133,9 +133,9 @@ void UCustomTableComponent::GenerateCollider(const FVector& MinBounds, const FVe
 	CustomBoxCollider.SetMaxBounds(MaxBounds);
 }
 
-FCustomCubeMeshData UCustomTableComponent::DrawTable(const FCustomCubeTransform& Transform, const FVector2D& LegsSize)
+FTACCubeMeshData UCustomTableComponent::DrawTable(const FTACCubeTransform& Transform, const FVector2D& LegsSize)
 {
-	FCustomCubeMeshData TableVerticesData = CustomShapesRenderer::DrawCube(Transform);
+	FTACCubeMeshData TableVerticesData = TACRender::DrawCube(Transform);
 	DrawFrontLeftLeg(Transform, TableVerticesData, LegsSize);
 	DrawFrontRightLeg(Transform, TableVerticesData, LegsSize);
 	DrawBackLeftLeg(Transform, TableVerticesData, LegsSize);
@@ -144,25 +144,25 @@ FCustomCubeMeshData UCustomTableComponent::DrawTable(const FCustomCubeTransform&
 	return TableVerticesData;
 }
 
-void UCustomTableComponent::DrawChairs(const FCustomCubeMeshData& TableCustomVertices)
+void UCustomTableComponent::DrawChairs(const FTACCubeMeshData& TableCustomVertices)
 {
 	// FRONT CHAIRS
-	const FCustomQuadVertices& TableFrontQuad = TableCustomVertices.Positions->FrontQuad;
+	const FTACQuadVertices& TableFrontQuad = TableCustomVertices.Positions->FrontQuad;
 	const FVector& TableFrontOffset = TableCustomVertices.Normals->FrontQuad.TopRight;
 	DrawSequenceOfChairs(TableFrontQuad.BottomRight, TableFrontQuad.BottomLeft, TableFrontOffset, 180.0f);
 
 	// LEFT CHARIS
-	const FCustomQuadVertices& TableLeftQuad = TableCustomVertices.Positions->LeftQuad;
+	const FTACQuadVertices& TableLeftQuad = TableCustomVertices.Positions->LeftQuad;
 	const FVector& TableLeftOffset = TableCustomVertices.Normals->LeftQuad.TopRight;
 	DrawSequenceOfChairs(TableLeftQuad.BottomRight, TableLeftQuad.BottomLeft, TableLeftOffset, 90.0f);
 
 	// BACK CHAIRS
-	const FCustomQuadVertices& TableBackQuad = TableCustomVertices.Positions->BackQuad;
+	const FTACQuadVertices& TableBackQuad = TableCustomVertices.Positions->BackQuad;
 	const FVector& TableBackOffset = TableCustomVertices.Normals->BackQuad.TopRight;
 	DrawSequenceOfChairs(TableBackQuad.BottomRight, TableBackQuad.BottomLeft, TableBackOffset, 0.0f);
 
 	// RIGHT CHARIS
-	const FCustomQuadVertices& TableRightQuad = TableCustomVertices.Positions->RightQuad;
+	const FTACQuadVertices& TableRightQuad = TableCustomVertices.Positions->RightQuad;
 	const FVector& TableRightOffset = TableCustomVertices.Normals->RightQuad.TopRight;
 	DrawSequenceOfChairs(TableRightQuad.BottomRight, TableRightQuad.BottomLeft, TableRightOffset, -90.0f);
 }
@@ -209,7 +209,7 @@ void UCustomTableComponent::DrawSequenceOfChairs(const FVector& TableRightCorner
 
 	while (DistanceTraveled <= DistanceToTravel)
 	{
-		FCustomCubeTransform ChairTransform
+		FTACCubeTransform ChairTransform
 		{
 			ChairTransform.Location = StartPosition + SequenceDirection * (DistanceTraveled - ChairSize.Y),
 			ChairTransform.Rotation = { 0.0f, 0.0f, Rotation + CustomTransform.Rotation.Z},
@@ -222,15 +222,15 @@ void UCustomTableComponent::DrawSequenceOfChairs(const FVector& TableRightCorner
 	}
 }
 
-FCustomCubeMeshData UCustomTableComponent::DrawChair(const FCustomCubeTransform& Transform)
+FTACCubeMeshData UCustomTableComponent::DrawChair(const FTACCubeTransform& Transform)
 {
-	FCustomCubeMeshData ChairSeat = DrawTable(Transform, ChairLegsSize);
+	FTACCubeMeshData ChairSeat = DrawTable(Transform, ChairLegsSize);
 
 	const FVector& ChairForwardDir = ChairSeat.Normals->FrontQuad.TopLeft;
 	const FVector& ChairLeftDir = ChairSeat.Normals->RightQuad.TopLeft;
 	const FVector& ChairUpDir = ChairSeat.Normals->TopQuad.TopLeft;
 
-	FCustomCubeTransform ChairBackRestTransform;
+	FTACCubeTransform ChairBackRestTransform;
 	ChairBackRestTransform.Location = ChairSeat.Positions->TopQuad.TopLeft;
 	ChairBackRestTransform.Location += ChairForwardDir * ChairBackRestSize.X;
 	ChairBackRestTransform.Location += ChairLeftDir * Transform.Size.Y;
@@ -242,12 +242,12 @@ FCustomCubeMeshData UCustomTableComponent::DrawChair(const FCustomCubeTransform&
 	ChairBackRestTransform.Size.Y = Transform.Size.Y;
 	ChairBackRestTransform.Size.Z = ChairBackRestSize.Z;
 
-	CustomShapesRenderer::DrawCube(ChairBackRestTransform);
+	TACRender::DrawCube(ChairBackRestTransform);
 
 	return ChairSeat;
 }
 
-FCustomCubeMeshData UCustomTableComponent::DrawFrontLeftLeg(const FCustomCubeTransform& Transform, const FCustomCubeMeshData& VerticesData, const FVector2D& LegsSize)
+FTACCubeMeshData UCustomTableComponent::DrawFrontLeftLeg(const FTACCubeTransform& Transform, const FTACCubeMeshData& VerticesData, const FVector2D& LegsSize)
 {
 	const float Height = (Transform.Location.Z - Transform.Size.Z) * 0.5f;
 
@@ -255,7 +255,7 @@ FCustomCubeMeshData UCustomTableComponent::DrawFrontLeftLeg(const FCustomCubeTra
 	const FVector& LeftDir = VerticesData.Normals->RightQuad.TopLeft;
 	const FVector& UpDir = VerticesData.Normals->TopQuad.TopLeft;
 
-	FCustomCubeTransform LegTransform;
+	FTACCubeTransform LegTransform;
 	LegTransform.Location = VerticesData.Positions->BottomQuad.BottomRight;
 	LegTransform.Location -= ForwardDir * LegsSize.X;
 	LegTransform.Location += LeftDir * LegsSize.Y;
@@ -267,10 +267,10 @@ FCustomCubeMeshData UCustomTableComponent::DrawFrontLeftLeg(const FCustomCubeTra
 	LegTransform.Size.Y = LegsSize.Y;
 	LegTransform.Size.Z = Height;
 
-	return CustomShapesRenderer::DrawCube(LegTransform);
+	return TACRender::DrawCube(LegTransform);
 }
 
-FCustomCubeMeshData UCustomTableComponent::DrawFrontRightLeg(const FCustomCubeTransform& Transform, const FCustomCubeMeshData& VerticesData, const FVector2D& LegsSize)
+FTACCubeMeshData UCustomTableComponent::DrawFrontRightLeg(const FTACCubeTransform& Transform, const FTACCubeMeshData& VerticesData, const FVector2D& LegsSize)
 {
 	const float Height = (Transform.Location.Z - Transform.Size.Z) * 0.5f;
 
@@ -278,7 +278,7 @@ FCustomCubeMeshData UCustomTableComponent::DrawFrontRightLeg(const FCustomCubeTr
 	const FVector& LeftDir = VerticesData.Normals->RightQuad.TopLeft;
 	const FVector& UpDir = VerticesData.Normals->TopQuad.TopLeft;
 
-	FCustomCubeTransform LegTransform;
+	FTACCubeTransform LegTransform;
 	LegTransform.Location = VerticesData.Positions->BottomQuad.BottomLeft;
 	LegTransform.Location -= ForwardDir * LegsSize.X;
 	LegTransform.Location -= LeftDir * LegsSize.Y;
@@ -290,10 +290,10 @@ FCustomCubeMeshData UCustomTableComponent::DrawFrontRightLeg(const FCustomCubeTr
 	LegTransform.Size.Y = LegsSize.Y;
 	LegTransform.Size.Z = Height;
 
-	return CustomShapesRenderer::DrawCube(LegTransform);
+	return TACRender::DrawCube(LegTransform);
 }
 
-FCustomCubeMeshData UCustomTableComponent::DrawBackLeftLeg(const FCustomCubeTransform& Transform, const FCustomCubeMeshData& VerticesData, const FVector2D& LegsSize)
+FTACCubeMeshData UCustomTableComponent::DrawBackLeftLeg(const FTACCubeTransform& Transform, const FTACCubeMeshData& VerticesData, const FVector2D& LegsSize)
 {
 	const float Height = (Transform.Location.Z - Transform.Size.Z) * 0.5f;
 
@@ -301,7 +301,7 @@ FCustomCubeMeshData UCustomTableComponent::DrawBackLeftLeg(const FCustomCubeTran
 	const FVector& LeftDir = VerticesData.Normals->RightQuad.TopLeft;
 	const FVector& UpDir = VerticesData.Normals->TopQuad.TopLeft;
 
-	FCustomCubeTransform LegTransform;
+	FTACCubeTransform LegTransform;
 	LegTransform.Location = VerticesData.Positions->BottomQuad.TopRight;
 	LegTransform.Location += ForwardDir * LegsSize.X;
 	LegTransform.Location += LeftDir * LegsSize.Y;
@@ -313,10 +313,10 @@ FCustomCubeMeshData UCustomTableComponent::DrawBackLeftLeg(const FCustomCubeTran
 	LegTransform.Size.Y = LegsSize.Y;
 	LegTransform.Size.Z = Height;
 
-	return CustomShapesRenderer::DrawCube(LegTransform);
+	return TACRender::DrawCube(LegTransform);
 }
 
-FCustomCubeMeshData UCustomTableComponent::DrawBackRightLeg(const FCustomCubeTransform& Transform, const FCustomCubeMeshData& VerticesData, const FVector2D& LegsSize)
+FTACCubeMeshData UCustomTableComponent::DrawBackRightLeg(const FTACCubeTransform& Transform, const FTACCubeMeshData& VerticesData, const FVector2D& LegsSize)
 {
 	const float Height = (Transform.Location.Z - Transform.Size.Z) * 0.5f;
 
@@ -324,7 +324,7 @@ FCustomCubeMeshData UCustomTableComponent::DrawBackRightLeg(const FCustomCubeTra
 	const FVector& LeftDir = VerticesData.Normals->RightQuad.TopLeft;
 	const FVector& UpDir = VerticesData.Normals->TopQuad.TopLeft;
 
-	FCustomCubeTransform LegTransform;
+	FTACCubeTransform LegTransform;
 	LegTransform.Location = VerticesData.Positions->BottomQuad.TopLeft;
 	LegTransform.Location += ForwardDir * LegsSize.X;
 	LegTransform.Location -= LeftDir * LegsSize.Y;
@@ -336,5 +336,5 @@ FCustomCubeMeshData UCustomTableComponent::DrawBackRightLeg(const FCustomCubeTra
 	LegTransform.Size.Y = LegsSize.Y;
 	LegTransform.Size.Z = Height;
 
-	return CustomShapesRenderer::DrawCube(LegTransform);
+	return TACRender::DrawCube(LegTransform);
 }

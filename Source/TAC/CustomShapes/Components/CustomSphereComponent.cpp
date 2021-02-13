@@ -2,17 +2,17 @@
 
 
 #include "CustomSphereComponent.h"
-#include "TAC/CustomShapes/CustomShapesRenderer.h"
+#include "TACRenderSystemModule/Public/TACRenderSystem.h"
 
 void UCustomSphereComponent::Draw()
 {
 	CustomShapeBuffers.Reset();
 
-	CustomShapesRenderer::BeginScene(CustomShapeBuffers, *this);
+	TACRender::BeginScene(CustomShapeBuffers, *this);
 	{
-		CustomShapesRenderer::DrawSphere(CustomTransform);
+		TACRender::DrawSphere(CustomTransform);
 	}
-	CustomShapesRenderer::EndScene();
+	TACRender::EndScene();
 }
 
 void UCustomSphereComponent::Draw(const FVector& Location, float Radius)

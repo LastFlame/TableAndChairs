@@ -2,7 +2,7 @@
 
 
 #include "CustomQuadComponent.h"
-#include "TAC/CustomShapes/CustomShapesRenderer.h"
+#include "TACRenderSystemModule/Public/TACRenderSystem.h"
 #include "DrawDebugHelpers.h"
 
 UCustomQuadComponent::UCustomQuadComponent(const FObjectInitializer& ObjectInitializer) : UProceduralMeshComponent(ObjectInitializer)
@@ -14,12 +14,12 @@ void UCustomQuadComponent::Draw()
 {
 	CustomShapeBuffers.Reset();
 
-	FCustomQuadMeshData Quad;
-	CustomShapesRenderer::BeginScene(CustomShapeBuffers, *this);
+	FTACQuadMeshData Quad;
+	TACRender::BeginScene(CustomShapeBuffers, *this);
 	{
-		Quad = CustomShapesRenderer::DrawQuad(CustomTransform);
+		Quad = TACRender::DrawQuad(CustomTransform);
 	}
-	CustomShapesRenderer::EndScene();
+	TACRender::EndScene();
 }
 
 void UCustomQuadComponent::Draw(const FVector& Location, const FVector2D& Size)
