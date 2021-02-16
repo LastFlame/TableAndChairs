@@ -17,7 +17,9 @@ ACustomGround::ACustomGround() : RaycastCollidersArray(*this)
 	if (CustomShapeDataAsset.Object != nullptr)
 	{
 		QuadComponent->GetCustomTransform().Size = CustomShapeDataAsset.Object->GetLocationBounds();
+		Tags.Add(CustomShapeDataAsset.Object->GetTableSpawnerTag());
 	}
+
 
 	Generate();
 }

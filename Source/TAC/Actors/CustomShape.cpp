@@ -47,6 +47,7 @@ ACustomShape::ACustomShape() : RaycastCollidersArray(*this)
 		CustomShapeTemplateData = CustomShapeDataAsset.Object;
 		SphereRadius = CustomShapeTemplateData->GetSphereRadius();
 		DragThreshold = CustomShapeTemplateData->GetDragThreashold();
+		Tags.Add(CustomShapeTemplateData->GetTableTag());
 	}
 
 	static ConstructorHelpers::FObjectFinder<UMaterial> SphereMaterial(TEXT("Material'/Game/StarterContent/Materials/M_Metal_Gold.M_Metal_Gold'"));

@@ -40,7 +40,7 @@ protected:
 };
 
 UINTERFACE(MinimalAPI)
-class  UTACHittable : public UInterface
+class UTACHittable : public UInterface
 {
 	GENERATED_BODY()
 };
@@ -50,6 +50,7 @@ class TACCOLLISIONSYSTEMMODULE_API ITACHittable
 	GENERATED_BODY()
 
 public:
+	virtual TWeakObjectPtr<AActor> GetActor() const = 0;
 	virtual const FTACBaseCollider& GetBoundCollider() const = 0;
 	virtual const class TACCollidersArray& GetColliders() const = 0;
 };

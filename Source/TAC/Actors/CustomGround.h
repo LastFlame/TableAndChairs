@@ -23,6 +23,7 @@ public:
 
 public:
 	/* ICustomRaycastHittable interface */
+	virtual TWeakObjectPtr<AActor> GetActor() const  override { return (AActor*)this; }
 	virtual const FTACBaseCollider& GetBoundCollider() const override { return QuadComponent->GetCollider(); }
 	virtual const TACCollidersArray& GetColliders() const override { return RaycastCollidersArray; }
 	/***********************************/

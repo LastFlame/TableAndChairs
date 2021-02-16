@@ -38,6 +38,9 @@ public:
 	const FVector2D& GetChairLegsSize() const { return ChairLegsSize; }
 	const FVector& GetChairBackRestSize() const { return ChairBackRestSize; }
 
+	const FName& GetTableTag() const { return TableTag; }
+	const FName& GetTableSpawnerTag() const { return TableSpawnerTag; }
+
 private:
 	UPROPERTY(EditAnywhere, Category = "CustomShapeActor|Sphere values")
 	float SphereRadius;
@@ -83,4 +86,10 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "TableComponent|Chairs values")
 	FVector ChairBackRestSize;
+
+	UPROPERTY(EditAnywhere, Category = "Actors tags")
+	FName TableTag;
+
+	UPROPERTY(EditAnywhere, Category = "Actors tags")
+	FName TableSpawnerTag;
 };
