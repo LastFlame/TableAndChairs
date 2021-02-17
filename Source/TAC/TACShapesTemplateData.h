@@ -6,15 +6,15 @@
 #include "Engine/DataAsset.h"
 #include "TACRenderSystemModule/Public/TACRenderShapesTypes.h"
 #include "TACCollisionSystemModule/Public/TACColliders.h"
-#include "CustomShapeTemplateDataAsset.generated.h"
+#include "TACShapesTemplateData.generated.h"
 
 UCLASS()
-class TAC_API UCustomShapeTemplateDataAsset : public UDataAsset
+class TAC_API UTACShapesTemplateData : public UDataAsset
 {
 	GENERATED_BODY()
 
 public:
-	UCustomShapeTemplateDataAsset();
+	UTACShapesTemplateData();
 
 public:
 	float GetSphereRadius() const { return SphereRadius; }

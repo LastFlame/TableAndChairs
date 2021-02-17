@@ -1,10 +1,10 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "CustomSphereComponent.h"
+#include "TACSphereComponent.h"
 #include "TACRenderSystemModule/Public/TACRenderSystem.h"
 
-void UCustomSphereComponent::Draw()
+void UTACSphereComponent::Draw()
 {
 	CustomShapeBuffers.Reset();
 
@@ -15,7 +15,7 @@ void UCustomSphereComponent::Draw()
 	TACRender::EndScene();
 }
 
-void UCustomSphereComponent::Draw(const FVector& Location, float Radius)
+void UTACSphereComponent::Draw(const FVector& Location, float Radius)
 {
 	CustomTransform.Location = Location;
 	CustomTransform.Radius = Radius;
@@ -23,13 +23,13 @@ void UCustomSphereComponent::Draw(const FVector& Location, float Radius)
 	Draw();
 }
 
-void UCustomSphereComponent::GenerateCollider()
+void UTACSphereComponent::GenerateCollider()
 {
 	CustomSphereCollider.SetLocation(CustomTransform.Location);
 	CustomSphereCollider.SetRadius(CustomTransform.Radius);
 }
 
-void UCustomSphereComponent::GenerateCollider(const FVector& Location, float Radius)
+void UTACSphereComponent::GenerateCollider(const FVector& Location, float Radius)
 {
 	CustomSphereCollider.SetLocation(Location);
 	CustomSphereCollider.SetRadius(Radius);

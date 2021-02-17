@@ -4,14 +4,15 @@
 #include "TACPlayerController.h"
 #include "DrawDebugHelpers.h"
 #include "GameFramework/PlayerInput.h"
-#include "TAC/Actors//ATACDefaultPawn.h"
-#include "TAC/Actors/CustomShape.h"
-#include "TAC/Actors/CustomGround.h"
+#include "TAC/Actors/ATACDefaultPawn.h"
+#include "TAC/TACShapesManager.h"
+#include "TAC/Actors/TACTableShape.h"
 #include "TACCollisionSystemModule/Public//TACCollisionSystem.h"
 
 static TWeakObjectPtr<UTACCollisionSystem> CollisionSystem;
+static TWeakObjectPtr<UTACShapesManager> ShapesManager;
 
-static TWeakObjectPtr<ACustomShape> DraggableActor;
+static TWeakObjectPtr<ATACTableShape> DraggableActor;
 static FTACBaseCollider* DraggableCollider = nullptr;
 
 static float DragSavedMouseX, DragSavedMouseY;
@@ -124,6 +125,7 @@ void ATACDefaultPlayerController::BeginPlay()
 	bShowMouseCursor = !bRotating;
 
 	CollisionSystem = GetWorld()->GetSubsystem<UTACCollisionSystem>();
+	ShapesManager = GetWorld()->GetSubsystem<UTACShapesManager>();
 }
 
 void ATACDefaultPlayerController::OnPossess(APawn* InPawn)
@@ -287,9 +289,9 @@ void ATACDefaultPlayerController::ShootLinecast()
 	UE_LOG(LogTemp, Warning, TEXT("HitActor = {%s}. Location = {%s}."), *HitActor->GetName(), *LinecastResult.GetHitPoint().ToString());
 	DrawDebugSphere(GetWorld(), LinecastResult.GetHitPoint(), 5.0f, 15.0f, FColor::Red, false, 5.0f);
 		
-	if (HitActor->ActorHasTag(FName("Table")))	// TODO template data asset manager.
+	if (HitActor->ActorHasTag(ShapesManager->GetShapesTemplateData().GetTableTag()))
 	{
-		DraggableActor = Cast<ACustomShape>(HitActor);
+		DraggableActor = Cast<ATACTableShape>(HitActor);
 		GetMousePosition(DragSavedMouseX, DragSavedMouseY);
 		
 		CurrentMouseCursor = EMouseCursor::GrabHandClosed;
@@ -306,9 +308,9 @@ void ATACDefaultPlayerController::ShootLinecast()
 			bMovingTable = true;
 		}
 	}
-	else if (HitActor->ActorHasTag(FName("TableSpawner"))) // TODO template data asset manager.
+	else if (HitActor->ActorHasTag(ShapesManager->GetShapesTemplateData().GetTableSpawnerTag()))
 	{
-		ACustomShape::Create(GetWorld(), LinecastResult.GetHitPoint());
+		ShapesManager->CreateTable(LinecastResult.GetHitPoint());
 	}
 }
 

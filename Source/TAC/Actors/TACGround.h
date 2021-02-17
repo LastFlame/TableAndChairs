@@ -4,18 +4,17 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "TAC/CustomShapes/Components/CustomQuadComponent.h"
+#include "TAC/CustomShapes/Components/TACQuadComponent.h"
 #include "TACCollisionSystemModule/Public/TACColliders.h"
-
-#include "CustomGround.generated.h"
+#include "TACGround.generated.h"
 
 UCLASS()
-class TAC_API ACustomGround : public AActor, public ITACHittable
+class TAC_API ATACGround : public AActor, public ITACHittable
 {
 	GENERATED_BODY()
 	
 public:	
-	ACustomGround();
+	ATACGround();
 
 public:
 	UFUNCTION(CallInEditor, Category = "Debug")
@@ -33,7 +32,7 @@ private:
 	USceneComponent* SceneComponent;
 
 	UPROPERTY(EditAnywhere, Category = "Components")
-	UCustomQuadComponent* QuadComponent;
+	UTACQuadComponent* QuadComponent;
 
 	TACCollidersArray RaycastCollidersArray;
 };

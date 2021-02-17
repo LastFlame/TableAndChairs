@@ -5,17 +5,17 @@
 #include "CoreMinimal.h"
 #include "TACRenderSystemModule/Public/TACRenderShapesTypes.h"
 #include "TACCollisionSystemModule/Public/TACColliders.h"
-#include "CustomTableComponent.generated.h"
+#include "TACTableComponent.generated.h"
 
-class UCustomShapeTemplateDataAsset;
+class UTACShapesTemplateData;
 
 UCLASS(hideCategories = "ProceduralMesh")
-class TAC_API UCustomTableComponent : public UProceduralMeshComponent
+class TAC_API UTACTableComponent : public UProceduralMeshComponent
 {
 	GENERATED_BODY()
 
 public:
-	UCustomTableComponent(const FObjectInitializer& ObjectInitializer);
+	UTACTableComponent(const FObjectInitializer& ObjectInitializer);
 
 public:
 	UFUNCTION(CallInEditor)
@@ -86,7 +86,7 @@ private:
 	FVector ChairBackRestSize;
 
 	UPROPERTY()
-	UCustomShapeTemplateDataAsset* CustomShapeTemplateData;
+	UTACShapesTemplateData* CustomShapeTemplateData;
 
 	UPROPERTY()
 	FTACShapeBuffers CustomShapeBuffers;

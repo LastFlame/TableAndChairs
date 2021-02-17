@@ -1,9 +1,9 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "CustomShapeTemplateDataAsset.h"
+#include "TACShapesTemplateData.h"
 
-UCustomShapeTemplateDataAsset::UCustomShapeTemplateDataAsset() :
+UTACShapesTemplateData::UTACShapesTemplateData() :
 	SphereRadius(8.0f), DragThreashold(5.0f), LocationBounds(500, 500),
 	CustomTransform({ 0.0f, 0.0f, 73.0f }, { 0.0f, 0.0f, 0.0f }, { 35.0f, 35.0f, 1.5f }), ColliderMaxBoundOffset(20.0f), TableLegsSize(2.0f, 2.0f),
 	TableMinSize(CustomTransform.Size.X, CustomTransform.Size.Y), DistanceBetweenChairs(10.0f), ChairDistanceFromTableSide(30.0f),

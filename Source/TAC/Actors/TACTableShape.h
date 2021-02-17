@@ -4,25 +4,23 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "TAC/CustomShapes/Components/CustomTableComponent.h"
+#include "TAC/CustomShapes/Components/TACTableComponent.h"
 #include "TACCollisionSystemModule/Public/TACColliders.h"
-#include "CustomShape.generated.h"
+#include "TACTableShape.generated.h"
 
 class USceneComponent;
-class UCustomSphereComponent;
-class UCustomShapeTemplateDataAsset;
+class UTACSphereComponent;
+class UTACShapesTemplateData;
 
 UCLASS()
-class TAC_API ACustomShape : public AActor, public ITACHittable
+class TAC_API ATACTableShape : public AActor, public ITACHittable
 {
 	GENERATED_BODY()
 
 public:
-	ACustomShape();
+	ATACTableShape();
 
 public:
-	static void Create(UWorld* World, const FVector& Location);
-
 	UFUNCTION(CallInEditor, Category = "Debug")
 	void Generate();
 
@@ -76,19 +74,19 @@ private:
 	USceneComponent* SceneComponent;
 
 	UPROPERTY(EditAnywhere, Category = "Components")
-	UCustomTableComponent* TableComponent;
+	UTACTableComponent* TableComponent;
 
 	UPROPERTY(EditAnywhere, Category = "Components")
-	UCustomSphereComponent* TopRightSphereComponent;
+	UTACSphereComponent* TopRightSphereComponent;
 
 	UPROPERTY(EditAnywhere, Category = "Components")
-	UCustomSphereComponent* BottomRightSphereComponent;
+	UTACSphereComponent* BottomRightSphereComponent;
 
 	UPROPERTY(EditAnywhere, Category = "Components")
-	UCustomSphereComponent* TopLeftSphereComponent;
+	UTACSphereComponent* TopLeftSphereComponent;
 
 	UPROPERTY(EditAnywhere, Category = "Components")
-	UCustomSphereComponent* BottomLeftSphereComponent;
+	UTACSphereComponent* BottomLeftSphereComponent;
 
 	UPROPERTY(VisibleAnywhere, Category = "Mesh values")
 	float SphereRadius;
@@ -102,14 +100,11 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = "Mesh values")
 	UMaterialInterface* OnSelectedTableMat;
 
-	UPROPERTY(VisibleAnywhere, Category = "Mesh values")
-	UMaterialInterface* OnMovingTableMat;
+	UPROPERTY()
+	UTACShapesTemplateData* CustomShapeTemplateData;
 
 	UPROPERTY()
-	UCustomShapeTemplateDataAsset* CustomShapeTemplateData;
-
-	UPROPERTY()
-	UCustomSphereComponent* PrevHitSphere;
+	UTACSphereComponent* PrevHitSphere;
 
 	TACCollidersArray RaycastCollidersArray;
 };

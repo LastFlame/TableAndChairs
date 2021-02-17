@@ -1,12 +1,11 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "CustomShape.h"
-#include "TAC/CustomShapes/Components/CustomSphereComponent.h"
+#include "TACTableShape.h"
 #include "DrawDebugHelpers.h"
-#include "TAC/CustomShapeTemplateDataAsset.h"
-#include "TACCollisionSystemModule/Public//TACCollisionSystem.h"
-#include "TAC/CustomGameMode.h"
+#include "TAC/CustomShapes/Components/TACSphereComponent.h"
+#include "TAC/TACShapesTemplateData.h"
+#include "TACCollisionSystemModule/Public/TACCollisionSystem.h"
 
 static TWeakObjectPtr<UTACCollisionSystem> CustomCollisionSystem;
 
@@ -16,32 +15,32 @@ static bool IsLocationBetweenBounds(const FVector2D& LocationBounds, const FVect
 		|| MaxLocation.Y > LocationBounds.Y || MaxLocation.X > LocationBounds.X);
 }
 
-ACustomShape::ACustomShape() : RaycastCollidersArray(*this)
+ATACTableShape::ATACTableShape() : RaycastCollidersArray(*this)
 {
 	SceneComponent = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
 	RootComponent = SceneComponent;
 	
-	TableComponent = CreateDefaultSubobject<UCustomTableComponent>(TEXT("TableComponent"));
+	TableComponent = CreateDefaultSubobject<UTACTableComponent>(TEXT("TableComponent"));
 	TableComponent->SetupAttachment(RootComponent);
 	TableComponent->GetCollider().SetFlag(ETACCollisionFlags::Dynamic);
 
-	TopRightSphereComponent = CreateDefaultSubobject<UCustomSphereComponent>(TEXT("TopRightSphereComponent"));
+	TopRightSphereComponent = CreateDefaultSubobject<UTACSphereComponent>(TEXT("TopRightSphereComponent"));
 	TopRightSphereComponent->SetupAttachment(RootComponent);
 	TopRightSphereComponent->GetCollider().SetFlag(ETACCollisionFlags::Dynamic);
 
-	BottomRightSphereComponent = CreateDefaultSubobject<UCustomSphereComponent>(TEXT("BottomRightSphereComponent"));
+	BottomRightSphereComponent = CreateDefaultSubobject<UTACSphereComponent>(TEXT("BottomRightSphereComponent"));
 	BottomRightSphereComponent->SetupAttachment(RootComponent);
 	BottomRightSphereComponent->GetCollider().SetFlag(ETACCollisionFlags::Dynamic);
 
-	TopLeftSphereComponent = CreateDefaultSubobject<UCustomSphereComponent>(TEXT("TopLeftSphereComponent"));
+	TopLeftSphereComponent = CreateDefaultSubobject<UTACSphereComponent>(TEXT("TopLeftSphereComponent"));
 	TopLeftSphereComponent->SetupAttachment(RootComponent);
 	TopLeftSphereComponent->GetCollider().SetFlag(ETACCollisionFlags::Dynamic);
 
-	BottomLeftSphereComponent = CreateDefaultSubobject<UCustomSphereComponent>(TEXT("BottomLeftSphereComponent"));
+	BottomLeftSphereComponent = CreateDefaultSubobject<UTACSphereComponent>(TEXT("BottomLeftSphereComponent"));
 	BottomLeftSphereComponent->SetupAttachment(RootComponent);
 	BottomLeftSphereComponent->GetCollider().SetFlag(ETACCollisionFlags::Dynamic);
 
-	static ConstructorHelpers::FObjectFinder<UCustomShapeTemplateDataAsset> CustomShapeDataAsset(TEXT("CustomShapeTemplateDataAsset'/Game/TAC/CustomShapeTemplateDataAsset.CustomShapeTemplateDataAsset'"));
+	static ConstructorHelpers::FObjectFinder<UTACShapesTemplateData> CustomShapeDataAsset(TEXT("TACShapesTemplateData'/Game/TAC/AssetData/TACShapesTemplateDataAsset.TACShapesTemplateDataAsset'"));
 	if (CustomShapeDataAsset.Object != nullptr)
 	{
 		CustomShapeTemplateData = CustomShapeDataAsset.Object;
@@ -62,59 +61,21 @@ ACustomShape::ACustomShape() : RaycastCollidersArray(*this)
 		OnSelectedTableMat = (UMaterial*)SelectedTableMaterial.Object;
 	}
 	
-	static ConstructorHelpers::FObjectFinder<UMaterial> MovingTableMaterial(TEXT("Material'/Game/StarterContent/Materials/M_Basic_Wall.M_Basic_Wall'"));
-	if (MovingTableMaterial.Object != nullptr)
-	{
-		OnMovingTableMat = (UMaterial*)MovingTableMaterial.Object;
-	}
-
 	RaycastCollidersArray.Add(TopRightSphereComponent->GetCollider());
 	RaycastCollidersArray.Add(BottomRightSphereComponent->GetCollider());
 	RaycastCollidersArray.Add(TopLeftSphereComponent->GetCollider());
 	RaycastCollidersArray.Add(BottomLeftSphereComponent->GetCollider());
 
-	TableComponent->GetCollider().OnLineTraceHit.AddUObject(this, &ACustomShape::OnBoundColliderHit);
-	TableComponent->GetCollider().OnLineTraceHitChanged.AddUObject(this, &ACustomShape::OnBoundColliderHitChanged);
+	TableComponent->GetCollider().OnLineTraceHit.AddUObject(this, &ATACTableShape::OnBoundColliderHit);
+	TableComponent->GetCollider().OnLineTraceHitChanged.AddUObject(this, &ATACTableShape::OnBoundColliderHitChanged);
 
-	TopRightSphereComponent->GetCollider().OnLineTraceHit.AddUObject(this, &ACustomShape::OnTopRightSphereHit);
-	BottomRightSphereComponent->GetCollider().OnLineTraceHit.AddUObject(this, &ACustomShape::OnBottomRightSphereHit);
-	TopLeftSphereComponent->GetCollider().OnLineTraceHit.AddUObject(this, &ACustomShape::OnTopLeftSphereHit);
-	BottomLeftSphereComponent->GetCollider().OnLineTraceHit.AddUObject(this, &ACustomShape::OnBottomLeftSphereHit);
+	TopRightSphereComponent->GetCollider().OnLineTraceHit.AddUObject(this, &ATACTableShape::OnTopRightSphereHit);
+	BottomRightSphereComponent->GetCollider().OnLineTraceHit.AddUObject(this, &ATACTableShape::OnBottomRightSphereHit);
+	TopLeftSphereComponent->GetCollider().OnLineTraceHit.AddUObject(this, &ATACTableShape::OnTopLeftSphereHit);
+	BottomLeftSphereComponent->GetCollider().OnLineTraceHit.AddUObject(this, &ATACTableShape::OnBottomLeftSphereHit);
 }
 
-
-void ACustomShape::Create(UWorld* World, const FVector& Location)
-{
-	const ACustomGameMode* CustomGameMode = Cast<const ACustomGameMode>(World->GetAuthGameMode());
-	if (CustomGameMode == nullptr)
-	{
-		return;
-	}
-
-	const UCustomShapeTemplateDataAsset& CustomShapeTemplateData = CustomGameMode->GetCustomShapeTemplateData();
-	const FTACBoxCollider& TableDefaultBounds = CustomShapeTemplateData.GetDefaultTableBoundCollider();
-
-	FTACBoxCollider TableToSpawnCollider;
-	TableToSpawnCollider.SetMinBounds(Location + TableDefaultBounds.GetMinBounds());
-	TableToSpawnCollider.SetMaxBounds(Location + TableDefaultBounds.GetMaxBounds());
-
-	if (!IsLocationBetweenBounds(CustomShapeTemplateData.GetLocationBounds(), TableToSpawnCollider.GetMinBounds(), TableToSpawnCollider.GetMaxBounds()))
-	{
-		return;
-	}
-
-	FTACCollisionResult Result;
-	if (World->GetSubsystem<UTACCollisionSystem>()->BoxTrace(TableToSpawnCollider, ETACCollisionFlags::Static, Result))
-	{
-		return;
-	}
-
-	ACustomShape* CustomShape = World->SpawnActor<ACustomShape>(FVector::ZeroVector, FRotator::ZeroRotator);
-	CustomShape->SetCustomLocation(Location.X, Location.Y);
-	CustomShape->Generate();
-}
-
-void ACustomShape::Generate()
+void ATACTableShape::Generate()
 {
 	FlushPersistentDebugLines(GetWorld());
 
@@ -135,7 +96,7 @@ void ACustomShape::Generate()
 	BottomLeftSphereComponent->GenerateCollider();
 }
 
-bool ACustomShape::Drag(const FTACBaseCollider& Collider, const FVector& DragLocation)
+bool ATACTableShape::Drag(const FTACBaseCollider& Collider, const FVector& DragLocation)
 {
 	if (TableComponent->GetCustomShapeBuffer().VertexBuffer.Num() == 0)
 	{
@@ -196,7 +157,7 @@ bool ACustomShape::Drag(const FTACBaseCollider& Collider, const FVector& DragLoc
 	return true;
 }
 
-bool ACustomShape::DragEdge(const FVector& ForwardDir, const FVector& RightDir, const FVector& DragDir, float ForwardDragDistance, float RightDragDistance)
+bool ATACTableShape::DragEdge(const FVector& ForwardDir, const FVector& RightDir, const FVector& DragDir, float ForwardDragDistance, float RightDragDistance)
 {
 	const float ForwardDotProd = FVector::DotProduct(ForwardDir, DragDir);
 	const float RightDotProd = FVector::DotProduct(RightDir, DragDir);
@@ -266,7 +227,7 @@ bool ACustomShape::DragEdge(const FVector& ForwardDir, const FVector& RightDir, 
 	return bDragged;
 }
 
-bool ACustomShape::Move(const FVector& Location)
+bool ATACTableShape::Move(const FVector& Location)
 {
 	FTACBoxCollider BoxCollider;
 
@@ -303,7 +264,7 @@ bool ACustomShape::Move(const FVector& Location)
 	return true;
 }
 
-void ACustomShape::ResetDraggableSphere()
+void ATACTableShape::ResetDraggableSphere()
 {
 	if (PrevHitSphere != nullptr)
 	{
@@ -311,24 +272,24 @@ void ACustomShape::ResetDraggableSphere()
 	}
 }
 
-void ACustomShape::BeginPlay()
+void ATACTableShape::BeginPlay()
 {
 	Super::BeginPlay();
 	CustomCollisionSystem = GetWorld()->GetSubsystem<UTACCollisionSystem>();
 }
 
-void ACustomShape::OnBoundColliderHit(const FVector& HitPoint)
+void ATACTableShape::OnBoundColliderHit(const FVector& HitPoint)
 {
 	TableComponent->SetMaterial(0, OnSelectedTableMat);
 }
 
-void ACustomShape::OnBoundColliderHitChanged()
+void ATACTableShape::OnBoundColliderHitChanged()
 {
 	ResetDraggableSphere();
 	TableComponent->SetMaterial(0, nullptr);
 }
 
-void ACustomShape::OnTopRightSphereHit(const FVector& HitPoint)
+void ATACTableShape::OnTopRightSphereHit(const FVector& HitPoint)
 {
 	ResetDraggableSphere();
 
@@ -336,7 +297,7 @@ void ACustomShape::OnTopRightSphereHit(const FVector& HitPoint)
 	PrevHitSphere = TopRightSphereComponent;
 }
 
-void ACustomShape::OnBottomRightSphereHit(const FVector& HitPoint)
+void ATACTableShape::OnBottomRightSphereHit(const FVector& HitPoint)
 {
 	ResetDraggableSphere();
 
@@ -344,7 +305,7 @@ void ACustomShape::OnBottomRightSphereHit(const FVector& HitPoint)
 	PrevHitSphere = BottomRightSphereComponent;
 }
 
-void ACustomShape::OnTopLeftSphereHit(const FVector& HitPoint)
+void ATACTableShape::OnTopLeftSphereHit(const FVector& HitPoint)
 {
 	ResetDraggableSphere();
 
@@ -352,7 +313,7 @@ void ACustomShape::OnTopLeftSphereHit(const FVector& HitPoint)
 	PrevHitSphere = TopLeftSphereComponent;
 }
 
-void ACustomShape::OnBottomLeftSphereHit(const FVector& HitPoint)
+void ATACTableShape::OnBottomLeftSphereHit(const FVector& HitPoint)
 {
 	ResetDraggableSphere();
 
@@ -360,12 +321,12 @@ void ACustomShape::OnBottomLeftSphereHit(const FVector& HitPoint)
 	PrevHitSphere = BottomLeftSphereComponent;
 }
 
-bool ACustomShape::IsBetweenLocationBounds(const FTACBoxCollider& BoxCollider) const
+bool ATACTableShape::IsBetweenLocationBounds(const FTACBoxCollider& BoxCollider) const
 {
 	return IsLocationBetweenBounds(CustomShapeTemplateData->GetLocationBounds(), BoxCollider.GetMinBounds(), BoxCollider.GetMaxBounds());
 }
 
-void ACustomShape::ShowDebugBoxCollider(const FTACBoxCollider& BoxCollider, const FColor& Color) const
+void ATACTableShape::ShowDebugBoxCollider(const FTACBoxCollider& BoxCollider, const FColor& Color) const
 {
 	if (TableComponent == nullptr)
 	{

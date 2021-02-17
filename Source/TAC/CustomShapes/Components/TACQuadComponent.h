@@ -5,15 +5,15 @@
 #include "CoreMinimal.h"
 #include "TACRenderSystemModule/Public/TACRenderShapesTypes.h"
 #include "TACCollisionSystemModule/Public/TACColliders.h"
-#include "CustomQuadComponent.generated.h"
+#include "TACQuadComponent.generated.h"
 
 UCLASS(hideCategories = "ProceduralMesh", ClassGroup = Custom, meta = (BlueprintSpawnableComponent))
-class TAC_API UCustomQuadComponent : public UProceduralMeshComponent
+class TAC_API UTACQuadComponent : public UProceduralMeshComponent
 {
 	GENERATED_BODY()
 	
 public: 
-	UCustomQuadComponent(const FObjectInitializer& ObjectInitializer);
+	UTACQuadComponent(const FObjectInitializer& ObjectInitializer);
 
 public:	
 	UFUNCTION(CallInEditor)

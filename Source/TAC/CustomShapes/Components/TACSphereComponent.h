@@ -5,10 +5,10 @@
 #include "CoreMinimal.h"
 #include "TACRenderSystemModule/Public/TACRenderShapesTypes.h"
 #include "TACCollisionSystemModule/Public/TACColliders.h"
-#include "CustomSphereComponent.generated.h"
+#include "TACSphereComponent.generated.h"
 
 UCLASS(hideCategories = "ProceduralMesh")
-class TAC_API UCustomSphereComponent : public UProceduralMeshComponent
+class TAC_API UTACSphereComponent : public UProceduralMeshComponent
 {
 	GENERATED_BODY()
 
