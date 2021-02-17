@@ -49,13 +49,13 @@ ATACTableShape::ATACTableShape() : RaycastCollidersArray(*this)
 		Tags.Add(CustomShapeTemplateData->GetTableTag());
 	}
 
-	static ConstructorHelpers::FObjectFinder<UMaterial> SphereMaterial(TEXT("Material'/Game/StarterContent/Materials/M_Metal_Gold.M_Metal_Gold'"));
+	static ConstructorHelpers::FObjectFinder<UMaterial> SphereMaterial(TEXT("Material'/Game/TAC/Materials/M_Metal_Gold.M_Metal_Gold'"));
 	if (SphereMaterial.Object != nullptr)
 	{
 		OnSphereSelectedMat = (UMaterial*)SphereMaterial.Object;
 	}
 
-	static ConstructorHelpers::FObjectFinder<UMaterial> SelectedTableMaterial(TEXT("Material'/Game/StarterContent/Materials/M_Basic_Floor.M_Basic_Floor'"));
+	static ConstructorHelpers::FObjectFinder<UMaterial> SelectedTableMaterial(TEXT("Material'/Game/TAC/Materials/M_Basic_Floor.M_Basic_Floor'"));
 	if (SelectedTableMaterial.Object != nullptr)
 	{
 		OnSelectedTableMat = (UMaterial*)SelectedTableMaterial.Object;
