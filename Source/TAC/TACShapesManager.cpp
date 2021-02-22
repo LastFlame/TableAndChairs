@@ -2,7 +2,7 @@
 
 
 #include "TACShapesManager.h"
-#include "TAC/Actors/TACTableShape.h"
+#include "TAC/Shapes/TACTableShape.h"
 #include "TACCollisionSystemModule/Public/TACCollisionSystem.h"
 
 static bool IsLocationBetweenBounds(const FVector2D& LocationBounds, const FVector& MinLocation, const FVector& MaxLocation)

@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "TAC/Actors/ATACDefaultPawn.h"
+#include "TAC/ATACDefaultPawn.h"
 
 static FVector MovementVector;
 

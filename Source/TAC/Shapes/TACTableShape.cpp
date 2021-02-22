@@ -3,7 +3,7 @@
 
 #include "TACTableShape.h"
 #include "DrawDebugHelpers.h"
-#include "TAC/CustomShapes/Components/TACSphereComponent.h"
+#include "TAC/Shapes/TACSphereComponent.h"
 #include "TAC/TACShapesTemplateData.h"
 #include "TACCollisionSystemModule/Public/TACCollisionSystem.h"
 

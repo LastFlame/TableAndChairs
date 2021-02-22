@@ -4,9 +4,9 @@
 #include "TACPlayerController.h"
 #include "DrawDebugHelpers.h"
 #include "GameFramework/PlayerInput.h"
-#include "TAC/Actors/ATACDefaultPawn.h"
+#include "TAC/ATACDefaultPawn.h"
 #include "TAC/TACShapesManager.h"
-#include "TAC/Actors/TACTableShape.h"
+#include "TAC/Shapes/TACTableShape.h"
 #include "TACCollisionSystemModule/Public//TACCollisionSystem.h"
 
 static TWeakObjectPtr<UTACCollisionSystem> CollisionSystem;

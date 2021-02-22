@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "TAC/CustomShapes/Components/TACTableComponent.h"
+#include "TAC/Shapes/TACTableComponent.h"
 #include "TACCollisionSystemModule/Public/TACColliders.h"
 #include "TACTableShape.generated.h"
 
