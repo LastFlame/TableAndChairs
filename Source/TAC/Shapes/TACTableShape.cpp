@@ -92,6 +92,14 @@ void ATACTableShape::Generate()
 	ShowDebugBoxCollider(TableComponent->GetCollider(), FColor::Red);
 }
 
+void ATACTableShape::GenerateBoundCollider()
+{
+	if (TableComponent != nullptr)
+	{
+		TableComponent->GenerateCollider();
+	}
+}
+
 bool ATACTableShape::Drag(const FTACBaseCollider& Collider, const FVector& DragLocation)
 {
 	if (TableComponent->GetCustomShapeBuffer().VertexBuffer.Num() == 0)

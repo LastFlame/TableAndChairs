@@ -24,6 +24,8 @@ public:
 	UFUNCTION(CallInEditor, Category = "Debug")
 	void Generate();
 
+	void GenerateBoundCollider();
+
 	bool Drag(const FTACBaseCollider& Collider, const FVector& DragLocation);
 	bool DragEdge(const FVector& ForwardDir, const FVector& RightDir, const FVector& DragDir, float ForwardDragDistance, float RightDragDistance);
 
