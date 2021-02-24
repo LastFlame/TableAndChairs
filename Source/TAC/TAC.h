@@ -4,3 +4,4 @@
 
 #include "CoreMinimal.h"
 
+bool IsLocationBetweenBounds(const FVector2D& LocationBounds, const FVector& MinLocation, const FVector& MaxLocation);

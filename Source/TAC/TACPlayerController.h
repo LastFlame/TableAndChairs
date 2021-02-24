@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
+#include "TAC/TAC.h"
 #include "GameFramework/PlayerController.h"
 #include "TACPlayerController.generated.h"
 

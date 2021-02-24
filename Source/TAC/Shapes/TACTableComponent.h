@@ -2,12 +2,15 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
+#include "TAC/TAC.h"
 #include "TACRenderSystemModule/Public/TACRenderShapesTypes.h"
 #include "TACCollisionSystemModule/Public/TACColliders.h"
 #include "TACTableComponent.generated.h"
 
 class UTACShapesTemplateData;
+
+// Table and chairs are a single procedural mesh to maintain only one draw call for table.
+// This optimization prevent to use multiple materials for the table and the chairs.
 
 UCLASS(hideCategories = "ProceduralMesh")
 class TAC_API UTACTableComponent : public UProceduralMeshComponent

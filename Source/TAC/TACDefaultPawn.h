@@ -2,9 +2,9 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
+#include "TAC/TAC.h"
 #include "GameFramework/DefaultPawn.h"
-#include "ATACDefaultPawn.generated.h"
+#include "TACDefaultPawn.generated.h"
 
 UCLASS()
 class TAC_API ATACDefaultPawn : public ADefaultPawn

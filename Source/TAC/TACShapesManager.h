@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
+#include "TAC/TAC.h"
 #include "Subsystems/WorldSubsystem.h"
 #include "TAC/TACShapesTemplateData.h"
 #include "TACShapesManager.generated.h"

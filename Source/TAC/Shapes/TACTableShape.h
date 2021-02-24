@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
+#include "TAC/TAC.h"
 #include "GameFramework/Actor.h"
 #include "TAC/Shapes/TACTableComponent.h"
 #include "TACCollisionSystemModule/Public/TACColliders.h"
@@ -30,6 +30,8 @@ public:
 	bool Move(const FVector& Location);
 
 	void ResetDraggableSphere();
+
+	bool IsBetweenLocationBounds(const FTACBoxCollider& BoxCollider) const;
 
 public:
 	/* ICustomRaycastHittable interface */
@@ -64,8 +66,6 @@ private:
 
 	UFUNCTION()
 	void OnBottomLeftSphereHit(const FVector& HitPoint);
-
-	bool IsBetweenLocationBounds(const FTACBoxCollider& BoxCollider) const;
 
 	void ShowDebugBoxCollider(const FTACBoxCollider& BoxCollider, const FColor& Color) const;
 

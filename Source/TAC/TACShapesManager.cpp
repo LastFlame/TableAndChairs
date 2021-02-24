@@ -5,12 +5,6 @@
 #include "TAC/Shapes/TACTableShape.h"
 #include "TACCollisionSystemModule/Public/TACCollisionSystem.h"
 
-static bool IsLocationBetweenBounds(const FVector2D& LocationBounds, const FVector& MinLocation, const FVector& MaxLocation)
-{
-	return !(MinLocation.Y < -LocationBounds.Y || MinLocation.X < -LocationBounds.X
-		|| MaxLocation.Y > LocationBounds.Y || MaxLocation.X > LocationBounds.X);
-}
-
 UTACShapesManager::UTACShapesManager() : UWorldSubsystem()
 {
 	static ConstructorHelpers::FObjectFinder<UTACShapesTemplateData> TableTemplateAsset(TEXT("TACShapesTemplateData'/Game/TAC/AssetData/TACShapesTemplateDataAsset.TACShapesTemplateDataAsset'"));

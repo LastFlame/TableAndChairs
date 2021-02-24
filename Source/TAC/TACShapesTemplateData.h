@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
+#include "TAC/TAC.h"
 #include "Engine/DataAsset.h"
 #include "TACRenderSystemModule/Public/TACRenderShapesTypes.h"
 #include "TACCollisionSystemModule/Public/TACColliders.h"

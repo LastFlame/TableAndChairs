@@ -9,12 +9,6 @@
 
 static TWeakObjectPtr<UTACCollisionSystem> CustomCollisionSystem;
 
-static bool IsLocationBetweenBounds(const FVector2D& LocationBounds, const FVector& MinLocation, const FVector& MaxLocation)
-{
-	return !(MinLocation.Y < -LocationBounds.Y || MinLocation.X < -LocationBounds.X
-		|| MaxLocation.Y > LocationBounds.Y || MaxLocation.X > LocationBounds.X);
-}
-
 ATACTableShape::ATACTableShape() : RaycastCollidersArray(*this)
 {
 	SceneComponent = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
@@ -80,20 +74,22 @@ void ATACTableShape::Generate()
 	FlushPersistentDebugLines(GetWorld());
 
 	FTACCubeMeshData Table = TableComponent->Draw();
-	TableComponent->GenerateCollider();
-	ShowDebugBoxCollider(TableComponent->GetCollider(), FColor::Red);
 
 	TopRightSphereComponent->Draw(Table.Positions->TopQuad.TopRight, SphereRadius);
-	TopRightSphereComponent->GenerateCollider();
 
 	BottomRightSphereComponent->Draw(Table.Positions->TopQuad.BottomRight, SphereRadius);
-	BottomRightSphereComponent->GenerateCollider();
 
 	TopLeftSphereComponent->Draw(Table.Positions->TopQuad.TopLeft, SphereRadius);
-	TopLeftSphereComponent->GenerateCollider();
 
 	BottomLeftSphereComponent->Draw(Table.Positions->TopQuad.BottomLeft, SphereRadius);
+
+	TableComponent->GenerateCollider();
+	TopRightSphereComponent->GenerateCollider();
+	BottomRightSphereComponent->GenerateCollider();
+	TopLeftSphereComponent->GenerateCollider();
 	BottomLeftSphereComponent->GenerateCollider();
+
+	ShowDebugBoxCollider(TableComponent->GetCollider(), FColor::Red);
 }
 
 bool ATACTableShape::Drag(const FTACBaseCollider& Collider, const FVector& DragLocation)
@@ -129,24 +125,21 @@ bool ATACTableShape::Drag(const FTACBaseCollider& Collider, const FVector& DragL
 			Generate();
 		}
 	}
-
-	if (&BottomRightSphereComponent->GetCollider() == SphereCollider)
+	else if (&BottomRightSphereComponent->GetCollider() == SphereCollider)
 	{
 		if (DragEdge(Table.Normals->FrontQuad.TopRight, Table.Normals->RightQuad.TopRight, DragDir, -DragThreshold, -DragThreshold))
 		{
 			Generate();
 		}
 	}
-
-	if (&TopLeftSphereComponent->GetCollider() == SphereCollider)
+	else if (&TopLeftSphereComponent->GetCollider() == SphereCollider)
 	{
 		if (DragEdge(Table.Normals->BackQuad.TopRight, Table.Normals->LeftQuad.TopRight, DragDir, DragThreshold, DragThreshold))
 		{
 			Generate();
 		}
 	}
-
-	if (&BottomLeftSphereComponent->GetCollider() == SphereCollider)
+	else if (&BottomLeftSphereComponent->GetCollider() == SphereCollider)
 	{
 		if (DragEdge(Table.Normals->FrontQuad.TopRight, Table.Normals->LeftQuad.TopRight, DragDir, -DragThreshold, DragThreshold))
 		{

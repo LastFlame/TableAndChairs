@@ -48,6 +48,11 @@ FTACCubeMeshData UTACTableComponent::Draw()
 	CustomShapeBuffers.Reset();
 	LastDrawnTable.Normals = nullptr;
 
+	if (CustomShapeTemplateData != nullptr)
+	{
+		CustomTransform.Location.Z = CustomShapeTemplateData->GetCustomTransform().Location.Z;
+	}
+
 	TACRender::BeginScene(CustomShapeBuffers, *this);
 	{
 		LastDrawnTable = DrawTable(CustomTransform, TableLegsSize);
@@ -100,30 +105,16 @@ bool UTACTableComponent::CreateCollider(const FTACCubeTransform& Transform, FTAC
 		+ TableRightNormal * DistanceFromtMidToRightBackRestChair);
 
 	// Location: bottom right looking at the table after the chairs.
-	OutBoxCollider.SetMinBounds((MinStartLocation + TableBackNormal * DistanceFromMidToFrontBackRestChair)
-		+ TableLeftNormal * DistanceFromtMidToRightBackRestChair);
+	FVector MinBounds = (MinStartLocation + TableBackNormal * DistanceFromMidToFrontBackRestChair)
+		+ TableLeftNormal * DistanceFromtMidToRightBackRestChair;
+	MinBounds.Z = 0.0f;
 
+	OutBoxCollider.SetMinBounds(MinBounds);
 	return true;
 }
 
 void UTACTableComponent::GenerateCollider()
 {
-	FTACCubeQuads* TableNormals = nullptr;
-
-	if (LastDrawnTable.Normals != nullptr)
-	{
-		TableNormals = LastDrawnTable.Normals;
-	}
-	else if (CustomShapeBuffers.NormalsBuffer.Num() != 0) // Fallback in case the mesh as been drawn but LastDrawnTable is null.
-	{
-		TableNormals = (FTACCubeQuads*)(&CustomShapeBuffers.NormalsBuffer[0]); // Mimic the return value of CustomShapesRenderer::DrawCube().
-	}
-
-	if (TableNormals == nullptr)
-	{
-		return;
-	}
-	
 	CreateCollider(CustomTransform, CustomBoxCollider);
 }
 

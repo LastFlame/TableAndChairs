@@ -4,7 +4,7 @@
 #include "TACPlayerController.h"
 #include "DrawDebugHelpers.h"
 #include "GameFramework/PlayerInput.h"
-#include "TAC/ATACDefaultPawn.h"
+#include "TAC/TACDefaultPawn.h"
 #include "TAC/TACShapesManager.h"
 #include "TAC/Shapes/TACTableShape.h"
 #include "TACCollisionSystemModule/Public//TACCollisionSystem.h"
@@ -411,6 +411,15 @@ void ATACDefaultPlayerController::DragHitActor()
 		FVector2D MouseLoc;
 		ProjectWorldLocationToScreen(DraggableCollider->GetLocation(), MouseLoc);
 		SetMouseLocation(MouseLoc.X, MouseLoc.Y);
+
+		// HACK!
+		// Sometimes (I can't find any deterministic way to replicate this error, but it can be a problem with the reading process of the procedural mesh normal array)
+		// the table bound generation fails and it goes out of the map bound.
+		// In order to fix this problem I regenerate the mesh and it's colliders (I could regenerate only the bound collider, but I want to be safer) when this error occurs.
+		if (!DraggableActor->IsBetweenLocationBounds((FTACBoxCollider&)DraggableActor->GetBoundCollider()))
+		{
+			DraggableActor->Generate();
+		}
 	}
 }
 
