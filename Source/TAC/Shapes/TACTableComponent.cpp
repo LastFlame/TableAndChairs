@@ -46,21 +46,17 @@ FTACCubeMeshData UTACTableComponent::Draw()
 	CustomTransform.Size.Y = FGenericPlatformMath::Max(CustomTransform.Size.Y, TableMinSize.Y);
 
 	CustomShapeBuffers.Reset();
-	LastDrawnTable.Normals = nullptr;
 
-	if (CustomShapeTemplateData != nullptr)
-	{
-		CustomTransform.Location.Z = CustomShapeTemplateData->GetCustomTransform().Location.Z;
-	}
+	FTACCubeMeshData Table;
 
 	TACRender::BeginScene(CustomShapeBuffers, *this);
 	{
-		LastDrawnTable = DrawTable(CustomTransform, TableLegsSize);
-		DrawChairs(LastDrawnTable);
+		Table = DrawTable(CustomTransform, TableLegsSize);
+		DrawChairs(Table);
 	}
 	TACRender::EndScene();
 
-	return LastDrawnTable;
+	return Table;
 }
 
 FTACCubeMeshData UTACTableComponent::Draw(const FVector& Location)
@@ -71,16 +67,7 @@ FTACCubeMeshData UTACTableComponent::Draw(const FVector& Location)
 
 bool UTACTableComponent::CreateCollider(const FTACCubeTransform& Transform, FTACBoxCollider& OutBoxCollider) const
 {
-	FTACCubeQuads* TableNormals = nullptr;
-
-	if (LastDrawnTable.Normals != nullptr)
-	{
-		TableNormals = LastDrawnTable.Normals;
-	}
-	else if (CustomShapeBuffers.NormalsBuffer.Num() != 0) // Fallback in case the mesh as been drawn but LastDrawnTable is null.
-	{
-		TableNormals = (FTACCubeQuads*)(&CustomShapeBuffers.NormalsBuffer[0]); // Mimic the return value of CustomShapesRenderer::DrawCube().
-	}
+	FTACCubeQuads* TableNormals((FTACCubeQuads*)(&CustomShapeBuffers.NormalsBuffer[0]));
 
 	if (TableNormals == nullptr)
 	{
@@ -92,7 +79,7 @@ bool UTACTableComponent::CreateCollider(const FTACCubeTransform& Transform, FTAC
 	const FVector& TableRightNormal = TableNormals->RightQuad.TopRight;
 	const FVector& TableLeftNormal = TableNormals->LeftQuad.TopRight;
 	const FVector& TableBackNormal = TableNormals->BackQuad.TopRight;
-
+																		
 	const float DistanceFromMidToFrontBackRestChair = Transform.Size.X + ChairDistanceFromTableSide + ChairSize.X + ChairBackRestSize.X + 5.0f;
 	const float DistanceFromtMidToRightBackRestChair = Transform.Size.Y + ChairDistanceFromTableSide + ChairSize.Y + ChairBackRestSize.Y + 5.0f;
 	const FVector MinStartLocation = Transform.Location - TableTopNormal * (Transform.Location.Z);
@@ -105,11 +92,9 @@ bool UTACTableComponent::CreateCollider(const FTACCubeTransform& Transform, FTAC
 		+ TableRightNormal * DistanceFromtMidToRightBackRestChair);
 
 	// Location: bottom right looking at the table after the chairs.
-	FVector MinBounds = (MinStartLocation + TableBackNormal * DistanceFromMidToFrontBackRestChair)
-		+ TableLeftNormal * DistanceFromtMidToRightBackRestChair;
-	MinBounds.Z = 0.0f;
+	OutBoxCollider.SetMinBounds((MinStartLocation + TableBackNormal * DistanceFromMidToFrontBackRestChair)
+		+ TableLeftNormal * DistanceFromtMidToRightBackRestChair);
 
-	OutBoxCollider.SetMinBounds(MinBounds);
 	return true;
 }
 

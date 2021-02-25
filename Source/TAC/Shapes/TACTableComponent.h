@@ -93,7 +93,5 @@ private:
 
 	UPROPERTY()
 	FTACShapeBuffers CustomShapeBuffers;
-
-	FTACCubeMeshData LastDrawnTable;
 };
 
